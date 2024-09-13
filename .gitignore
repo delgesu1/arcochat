@@ -29,3 +29,7 @@ node_modules
    .env
    .env.local
    build
+node_modules
+   .env
+   .env.local
+   build
