@@ -16,11 +16,18 @@ export const ChatPopup = ({ isOpen, onClose }) => {
 
   useEffect(() => {
     const initializeChat = async () => {
-      const thread = await createThread();
-      setThreadId(thread.id);
+      try {
+        const thread = await createThread();
+        setThreadId(thread.id);
+      } catch (error) {
+        console.error('Error initializing chat:', error);
+        // Add user-friendly error handling here
+      }
     };
-    initializeChat();
-  }, []);
+    if (isOpen) {
+      initializeChat();
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -29,7 +36,10 @@ export const ChatPopup = ({ isOpen, onClose }) => {
   }, [messages]);
 
   const handleSendMessage = async (message) => {
-    if (!threadId) return;
+    if (!threadId) {
+      console.error('Thread ID is not set');
+      return;
+    }
 
     setMessages(prevMessages => [...prevMessages, { role: 'user', content: message }]);
     setIsTyping(true);

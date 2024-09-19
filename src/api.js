@@ -1,11 +1,12 @@
 import { createOrUpdateAssistant } from './assistantSetup';
 import OpenAI from "openai";
 
-const openai = new OpenAI(process.env.REACT_APP_OPENAI_API_KEY);
+const openai = new OpenAI({ apiKey: process.env.REACT_APP_OPENAI_API_KEY });
 const ASSISTANT_ID = process.env.REACT_APP_OPENAI_ASSISTANT_ID;
 const VECTOR_STORE_ID = process.env.REACT_APP_VECTOR_STORE_ID;
 
 console.log('Assistant ID:', ASSISTANT_ID);
+console.log('Vector Store ID:', VECTOR_STORE_ID);
 
 export const initializeAssistant = async () => {
   try {
@@ -43,15 +44,11 @@ export const runAssistant = async (threadId) => {
   try {
     return await openai.beta.threads.runs.create(threadId, {
       assistant_id: ASSISTANT_ID,
-      model: 'gpt-4o-mini',
-      tools: [{ type: "file_search" }],
-      tool_resources: {
-        file_search: {
-          vector_store_ids: [VECTOR_STORE_ID]
-        }
-      },
-      temperature: 0.2,
-      top_p: 0.9
+      model: 'gpt-4-1106-preview', // Updated model name
+      tools: [{ type: "retrieval" }],
+      metadata: {
+        vector_store_id: VECTOR_STORE_ID
+      }
     });
   } catch (error) {
     console.error('Error running assistant:', error);
@@ -91,7 +88,8 @@ export const streamAssistantResponse = async (threadId, runId, onToken) => {
         }
         done = true;
       } else if (runStatus.status === 'failed') {
-        throw new Error('Run failed');
+        console.error('Run failed:', runStatus.last_error);
+        throw new Error('Run failed: ' + runStatus.last_error?.message);
       } else {
         await new Promise(resolve => setTimeout(resolve, 1000));
       }
