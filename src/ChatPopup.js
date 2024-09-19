@@ -60,13 +60,10 @@ export const ChatPopup = ({ isOpen, onClose }) => {
     } catch (error) {
       console.error('Error in handleSendMessage:', error);
       if (error.message !== 'Response cancelled') {
-        setMessages(prevMessages => {
-          const newMessages = [...prevMessages];
-          if (newMessages[newMessages.length - 1].role === 'assistant') {
-            newMessages.pop();
-          }
-          return [...newMessages, { role: 'assistant', content: 'Sorry, I encountered an error. Please try again.' }];
-        });
+        setMessages(prevMessages => [
+          ...prevMessages,
+          { role: 'assistant', content: 'Sorry, I encountered an error. Please try again.' }
+        ]);
       }
     } finally {
       setIsTyping(false);
