@@ -1,31 +1,34 @@
-import React, { useState, useRef, useEffect, useImperativeHandle, forwardRef } from 'react';
+import React, { useState, useEffect, useRef, forwardRef } from 'react';
+import { FiSend, FiX } from 'react-icons/fi';
 import './InputArea.css';
 
-export const InputArea = forwardRef(({ onSendMessage, onCancel, isTyping }, ref) => {
+export const InputArea = forwardRef(({ onSendMessage, onCancel, isTyping, value, onChange }, ref) => {
   const [message, setMessage] = useState('');
   const textareaRef = useRef(null);
 
-  // Expose the restoreMessage method to parent via ref
-  useImperativeHandle(ref, () => ({
-    restoreMessage: (msg) => {
-      setMessage(msg);
-      // Optionally, focus the textarea after restoring
-      if (textareaRef.current) {
-        textareaRef.current.focus();
-      }
-    },
-  }));
+  useEffect(() => {
+    setMessage(value);
+  }, [value]);
 
   useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = '40px'; // Reset to default height
-      const scrollHeight = textareaRef.current.scrollHeight;
-      textareaRef.current.style.height = `${scrollHeight}px`;
-    }
+    adjustTextareaHeight();
   }, [message]);
 
+  const adjustTextareaHeight = () => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = 'auto';
+      textarea.style.height = `${Math.max(textarea.scrollHeight, 24)}px`;
+    }
+  };
+
+  const handleChange = (e) => {
+    setMessage(e.target.value);
+    onChange(e);
+  };
+
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey && !isTyping) {
+    if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
     }
@@ -33,14 +36,9 @@ export const InputArea = forwardRef(({ onSendMessage, onCancel, isTyping }, ref)
 
   const handleSend = () => {
     if (message.trim()) {
-      onSendMessage(message.trim());
+      onSendMessage(message);
       setMessage('');
-    }
-  };
-
-  const handleCancel = () => {
-    if (isTyping) {
-      onCancel();
+      adjustTextareaHeight();
     }
   };
 
@@ -49,29 +47,19 @@ export const InputArea = forwardRef(({ onSendMessage, onCancel, isTyping }, ref)
       <textarea
         ref={textareaRef}
         value={message}
-        onChange={(e) => setMessage(e.target.value)}
+        onChange={handleChange}
         onKeyDown={handleKeyDown}
         placeholder="Type your message..."
         disabled={isTyping}
-        rows={1}
+        rows={1}  // Start with one row
       />
       <button
         className={`send-button ${isTyping ? 'stop-button' : ''}`}
-        onClick={isTyping ? handleCancel : handleSend}
-        disabled={!isTyping && !message.trim()}
-        aria-label={isTyping ? "Cancel AI Response" : "Send message"}
+        onClick={isTyping ? onCancel : handleSend}
+        disabled={!message.trim() && !isTyping}
+        aria-label={isTyping ? "Stop generating" : "Send message"}
       >
-        {isTyping ? (
-          /* Stop (Cancel) icon */
-          <svg viewBox="0 0 24 24">
-            <path d="M6 6L18 18M6 18L18 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-          </svg>
-        ) : (
-          /* Send icon */
-          <svg viewBox="0 0 24 24">
-            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
-          </svg>
-        )}
+        {isTyping ? <FiX /> : <FiSend />}
       </button>
     </div>
   );

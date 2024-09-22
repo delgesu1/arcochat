@@ -5,21 +5,20 @@
   background-color: var(--background-color);
   border-top: 1px solid var(--light-gray);
   display: flex;                /* Use flex layout */
-  align-items: center;          /* Center items vertically */
+  align-items: flex-end;  /* Changed from center to flex-end */
   gap: 8px;                     /* Space between textarea and button */
 }
 
 .input-area textarea {
   width: 100%; /* Ensure it occupies full available width */
   flex: 1;                      /* Allow textarea to grow and fill space */
-  height: 24px;
-  min-height: 24px;
+  min-height: 24px;  /* Set a minimum height */
   max-height: 150px;
   padding: 8px 12px;            /* Adjust padding */
   border: 1px solid var(--light-gray);
   border-radius: 20px;          /* Apply rounded corners */
   font-size: 14px;
-  line-height: 24px;
+  line-height: 20px;  /* Set a specific line height */
   background-color: #ffffff;
   resize: none;
   overflow-y: hidden;

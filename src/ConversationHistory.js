@@ -25,7 +25,11 @@ const formatDate = (date) => {
 const ConversationHistory = ({ conversations, onSelectConversation, onClose, isOpen }) => {
   const groupConversationsByDate = (conversations) => {
     const grouped = {};
-    conversations.forEach(conversation => {
+    
+    // Sort conversations by date, newest first
+    const sortedConversations = [...conversations].sort((a, b) => new Date(b.date) - new Date(a.date));
+    
+    sortedConversations.forEach(conversation => {
       const date = new Date(conversation.date);
       let groupTitle;
 
@@ -42,7 +46,17 @@ const ConversationHistory = ({ conversations, onSelectConversation, onClose, isO
       }
       grouped[groupTitle].push(conversation);
     });
-    return grouped;
+    
+    // Sort the group titles (dates) from newest to oldest
+    const sortedGroups = Object.entries(grouped).sort((a, b) => {
+      if (a[0] === 'Today') return -1;
+      if (b[0] === 'Today') return 1;
+      if (a[0] === 'Yesterday') return -1;
+      if (b[0] === 'Yesterday') return 1;
+      return new Date(b[0]) - new Date(a[0]);
+    });
+    
+    return sortedGroups;
   };
 
   const groupedConversations = groupConversationsByDate(conversations);
@@ -56,7 +70,7 @@ const ConversationHistory = ({ conversations, onSelectConversation, onClose, isO
         </button>
       </div>
       <div className="conversation-list-container">
-        {Object.entries(groupedConversations).map(([date, convos]) => (
+        {groupedConversations.map(([date, convos]) => (
           <div key={date} className="conversation-group">
             <div className="conversation-group-title">{date}</div>
             {convos.map((conversation) => (

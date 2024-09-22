@@ -7,22 +7,17 @@ import { InputArea } from './InputArea';
 import { createAssistantConversation } from './api';
 import './ChatPopup.css';
 import ConversationHistory from './ConversationHistory';
-import { getRandomQuestions } from './utils'; // We'll create this utility function
+import { getRandomQuestions } from './utils';
 
-export const ChatPopup = ({ isOpen, onClose }, ref) => {
+export const ChatPopup = forwardRef(({ isOpen, onClose }, ref) => {
   const [messages, setMessages] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
-  const abortControllerRef = useRef(null);
-  const inputAreaRef = useRef(null);
-  const messagesEndRef = useRef(null);
-  
-  // State to manage view mode: popup or expanded sidebar
   const [isExpanded, setIsExpanded] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
-  const [conversations, setConversations] = useState(() => {
+  const [conversationList, setConversationList] = useState(() => {
     const today = new Date();
     const oneDay = 24 * 60 * 60 * 1000;
-    const conversationList = [
+    const conversations = [
       { id: 1, title: "Vibrato Techniques for Beginners", date: new Date(today - 2 * oneDay).toISOString().split('T')[0] },
       { id: 2, title: "Proper Bow Hold for Smooth Sound", date: new Date(today - 4 * oneDay).toISOString().split('T')[0] },
       { id: 3, title: "Scales Practice Routine", date: new Date(today - oneDay).toISOString().split('T')[0] },
@@ -46,17 +41,26 @@ export const ChatPopup = ({ isOpen, onClose }, ref) => {
     ];
     
     // Sort conversations by date, newest first
-    return conversationList.sort((a, b) => new Date(b.date) - new Date(a.date));
+    return conversations.sort((a, b) => new Date(b.date) - new Date(a.date));
   });
+
+  const [conversations, setConversations] = useState([]);
+  const [currentConversationId, setCurrentConversationId] = useState(null);
+  const [sampleQuestions, setSampleQuestions] = useState([]);
+  const [inputValue, setInputValue] = useState('');
+  
+  const messagesEndRef = useRef(null);
+  const inputAreaRef = useRef(null);
+  const abortControllerRef = useRef(null);  // Add this line
 
   useEffect(() => {
     // Generate welcome message with random questions when the component mounts
     const randomQuestions = getRandomQuestions(5);
+    setSampleQuestions(randomQuestions);
     const welcomeMessage = {
       role: 'assistant',
-      content: `🎻 Welcome! I’m Professor Arco AI, your violin mentor, trained with the most comprehensive collection of violin knowledge ever assembled, drawing from the greatest minds in pedagogy. Whether refining technique, enhancing musicality, or improving practice habits, I’m here to help. Let’s make your journey productive and enjoyable! Try asking me questions like:
-
-${randomQuestions.map(q => `- ${q}`).join('\n')}`
+      content: `🎻 Welcome! I'm Professor Arco AI, your violin mentor, trained with the most comprehensive collection of violin knowledge ever assembled, drawing from the greatest minds in pedagogy. Whether refining technique, enhancing musicality, or improving practice habits, I'm here to help. Let's make your journey productive and enjoyable! Try asking me one of these questions:`,
+      sampleQuestions: randomQuestions
     };
     setMessages([welcomeMessage]);
   }, []);
@@ -137,7 +141,15 @@ ${randomQuestions.map(q => `- ${q}`).join('\n')}`
     }
   };
 
-  // Toggle between popup and expanded sidebar
+  const handleQuestionClick = (question) => {
+    setInputValue(question);
+    setTimeout(() => {
+      if (inputAreaRef.current) {
+        inputAreaRef.current.focus();
+      }
+    }, 0);
+  };
+
   const toggleView = () => {
     setIsExpanded(prev => !prev);
   };
@@ -147,7 +159,6 @@ ${randomQuestions.map(q => `- ${q}`).join('\n')}`
   };
 
   const selectConversation = (conversationId) => {
-    // Implement logic to load the selected conversation
     console.log(`Selected conversation: ${conversationId}`);
     setIsHistoryOpen(false);
   };
@@ -161,7 +172,7 @@ ${randomQuestions.map(q => `- ${q}`).join('\n')}`
   return (
     <>
       <ConversationHistory
-        conversations={conversations}
+        conversations={conversationList}
         onSelectConversation={selectConversation}
         onClose={closeHistory}
         isOpen={isHistoryOpen}
@@ -188,18 +199,23 @@ ${randomQuestions.map(q => `- ${q}`).join('\n')}`
             </button>
           </div>
         </div>
-        <MessageList messages={messages} isTyping={isTyping} />
+        <MessageList 
+          messages={messages} 
+          isTyping={isTyping} 
+          onSampleQuestionClick={handleQuestionClick}
+        />
         <div ref={messagesEndRef} />
         <InputArea
           ref={inputAreaRef}
           onSendMessage={handleSendMessage}
           onCancel={handleCancel}
           isTyping={isTyping}
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
         />
       </div>
     </>
   );
-};
+});
 
-// Forward ref if needed elsewhere
-export default forwardRef(ChatPopup);
+export default ChatPopup;

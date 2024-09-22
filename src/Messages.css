@@ -127,3 +127,73 @@
     opacity: 0.7;
   }
 }
+
+/* Sample Question Buttons */
+.sample-questions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.sample-question-button {
+  background-color: #ffffff;  /* Clean white background */
+  border: 1px solid #e0e4e8;  /* Subtle, light border */
+  border-radius: 12px;  /* Slightly less rounded for a modern look */
+  padding: 12px 18px;
+  font-size: 14px;
+  color: #4a5568;  /* Softer, more neutral text color */
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);  /* Very subtle shadow */
+}
+
+.sample-question-button:hover {
+  background-color: #f7fafc;  /* Extremely subtle background change on hover */
+  border-color: #cbd5e0;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.sample-question-button:active {
+  transform: translateY(1px);  /* Subtle press effect */
+}
+
+.question-text {
+  flex: 1;
+  padding-right: 12px;
+  line-height: 1.5;
+  word-wrap: break-word;
+}
+
+.question-arrow {
+  font-size: 18px;
+  color: #718096;  /* Neutral arrow color */
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity 0.2s ease, transform 0.2s ease, color 0.2s ease;
+  flex-shrink: 0;
+}
+
+.sample-question-button:hover .question-arrow {
+  opacity: 1;
+  transform: translateX(0);
+  color: #4299e1;  /* Blue accent on hover */
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 480px) {
+  .sample-questions {
+    margin-top: 16px;
+  }
+
+  .sample-question-button {
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+}
+
+/* ... rest of the existing styles ... */
