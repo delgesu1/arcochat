@@ -3,7 +3,7 @@
   --font-family: 'Inter', sans-serif;
 
   /* Primary Colors */
-  --primary-color: #4a90e2; /* Softer blue */
+  --primary-color: #24435c; /* Softer blue */
   --secondary-color: #ffffff;
 
   /* Background Colors */
@@ -15,7 +15,7 @@
   --secondary-text-color: #636e72;
 
   /* Message Colors */
-  --user-message-color: #4a90e2;
+  --user-message-color: #24435c;
   --assistant-message-color: #dfe6e9;
 
   /* Other Colors */
