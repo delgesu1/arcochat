@@ -54,7 +54,7 @@ export const ChatPopup = ({ isOpen, onClose }, ref) => {
     const randomQuestions = getRandomQuestions(5);
     const welcomeMessage = {
       role: 'assistant',
-      content: `🎻 Welcome! I'm Professor Arco AI, your violin mentor. Whether refining technique, boosting musicality, or improving practice habits, I'm here to help. Let's make your journey productive and enjoyable! Try asking me questions like:
+      content: `🎻 Welcome! I’m Professor Arco AI, your violin mentor, trained with the most comprehensive collection of violin knowledge ever assembled, drawing from the greatest minds in pedagogy. Whether refining technique, enhancing musicality, or improving practice habits, I’m here to help. Let’s make your journey productive and enjoyable! Try asking me questions like:
 
 ${randomQuestions.map(q => `- ${q}`).join('\n')}`
     };
