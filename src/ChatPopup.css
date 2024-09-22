@@ -30,7 +30,7 @@
 .chat-popup.expanded {
   bottom: 0;
   right: 0;
-  width: 500px; /* Adjusted width for sidebar (increased by 50px) */
+  width: 575px; /* Increased from 500px to 575px (15% increase) */
   height: 100vh; /* Full viewport height */
   border-radius: 0; /* Remove rounded corners */
   box-shadow: none; /* Remove shadow for sidebar */
@@ -128,9 +128,9 @@
   }
 
   .chat-popup.expanded {
-    width: 90%;
+    width: 100%; /* Full width on smaller screens */
     height: 100vh;
-    right: 5%;
+    right: 0;
     bottom: 0;
     border-radius: 0;
   }

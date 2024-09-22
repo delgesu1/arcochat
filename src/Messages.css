@@ -24,6 +24,7 @@
   color: var(--text-color);
   margin-right: auto;
   border-bottom-left-radius: 4px;
+  padding: 15px 19px; /* Increased padding for assistant messages */
 }
 
 .message.system {
