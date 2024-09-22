@@ -7,6 +7,7 @@ import { InputArea } from './InputArea';
 import { createAssistantConversation } from './api';
 import './ChatPopup.css';
 import ConversationHistory from './ConversationHistory';
+import { getRandomQuestions } from './utils'; // We'll create this utility function
 
 export const ChatPopup = ({ isOpen, onClose }, ref) => {
   const [messages, setMessages] = useState([]);
@@ -44,6 +45,18 @@ export const ChatPopup = ({ isOpen, onClose }, ref) => {
       { id: 20, title: "Maintaining Your Violin", date: today.toISOString().split('T')[0] },
     ];
   });
+
+  useEffect(() => {
+    // Generate welcome message with random questions when the component mounts
+    const randomQuestions = getRandomQuestions(4);
+    const welcomeMessage = {
+      role: 'assistant',
+      content: `🎻 Hello and welcome! I'm Professor Arco AI, your expert violin mentor. Whether you're looking to refine your technique, enhance your musicality, or develop healthy practice habits, I'm here to help you achieve your goals. With detailed, step-by-step guidance, I can assist you in overcoming challenges and mastering the violin. Let's make your violin journey both productive and enjoyable! You can try asking me questions such as:
+
+${randomQuestions.map(q => `- ${q}`).join('\n')}`
+    };
+    setMessages([welcomeMessage]);
+  }, []);
 
   useEffect(() => {
     if (messagesEndRef.current) {

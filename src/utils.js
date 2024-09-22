@@ -1,0 +1,47 @@
+const sampleQuestions = [
+    "How can I improve my finger dexterity for fast passages, especially in pieces like Paganini Caprices?",
+    "What are some effective exercises to develop a smooth and continuous vibrato?",
+    "How can I achieve better bow distribution when playing long, sustained notes?",
+    "What techniques can help me master spiccato and sautillé bow strokes?",
+    "How can I improve my intonation when playing double stops, particularly in thirds and sixths?",
+    "What are the best methods to practice shifting accurately between positions, especially in fast passages?",
+    "How can I develop a more expressive and varied vibrato for different musical styles?",
+    "What exercises can help me maintain evenness and control in my bowing, particularly during string crossings?",
+    "How can I improve my left-hand finger independence and strength, especially for challenging passages?",
+    "What are some advanced techniques for playing chords and arpeggios cleanly and in tune?",
+    "How can I practice to achieve a more consistent and controlled martelé stroke?",
+    "What are some strategies for improving my dynamic range and control on the violin?",
+    "How can I develop better coordination between my left and right hands, especially in complex passages?",
+    "What are some effective ways to practice and master ricochet bowing?",
+    "How can I improve my ability to play fast, clean trills and ornaments?",
+    "What exercises can help me develop a more fluid and connected legato bowing?",
+    "How can I practice to achieve a more powerful and resonant sound on the G-string?",
+    "What are some techniques for improving my bow control and articulation at the frog and tip?",
+    "How can I practice to develop a more relaxed and efficient left-hand technique, especially for high positions?",
+    "What are some advanced methods for practicing and mastering difficult passages in concertos and solo pieces?",
+    "How can I effectively practice left-hand pizzicato to strengthen my fingers and improve my technique?",
+    "What are some advanced exercises to develop a more controlled and expressive portamento?",
+    "How can I use the \"floating thumb\" technique to reduce tension in my left hand while playing?",
+    "What are the best methods to practice and master rapid string crossings in complex passages?",
+    "How can I improve my bow control and articulation using the \"Paganini Stroke\"?",
+    "What exercises can help me develop a more relaxed and efficient vibrato, especially in high positions?",
+    "How can I practice to achieve a more powerful and resonant sound on the lower strings?",
+    "What are some techniques for improving my bowing accuracy and evenness at the frog?",
+    "How can I develop better coordination between my left and right hands using rhythmic variations?",
+    "What are some effective ways to practice and master ricochet bowing for advanced repertoire?",
+    "How can I improve my ability to play fast, clean double stops, particularly in thirds and sixths?",
+    "What exercises can help me develop a more fluid and connected legato bowing in lyrical passages?",
+    "How can I practice to achieve a more consistent and controlled martelé stroke in fast passages?",
+    "What are some strategies for improving my dynamic range and control on the violin?",
+    "How can I develop better finger independence and strength using advanced etudes and exercises?",
+    "What are some effective methods for practicing and mastering difficult shifts in high positions?",
+    "How can I improve my intonation when playing complex chords and arpeggios?",
+    "What exercises can help me maintain evenness and control in my bowing, particularly during fast passages?",
+    "How can I practice to achieve a more relaxed and efficient left-hand technique, especially for challenging extensions?",
+    "What are some advanced methods for practicing and mastering difficult passages in concertos and solo pieces?"
+  ];
+  
+  export const getRandomQuestions = (count) => {
+    const shuffled = [...sampleQuestions].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, count);
+  };
