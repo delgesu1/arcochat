@@ -215,3 +215,87 @@
 }
 
 /* ... rest of the existing styles ... */
+
+/* Mobile-specific styles */
+@media screen and (max-width: 767px) {
+  .chat-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    border-radius: 0;
+    transform: none;
+  }
+
+  .chat-popup.open {
+    transform: none;
+  }
+
+  .chat-popup.expanded {
+    width: 100%;
+    height: 100%;
+  }
+
+  .chat-header {
+    padding: 12px;
+    height: 50px; /* Fixed height for header */
+  }
+
+  .chat-header h3 {
+    font-size: 18px;
+  }
+
+  .message-list {
+    height: calc(100% - 110px); /* Adjust based on header and input area heights */
+    padding: 10px;
+  }
+
+  .input-area {
+    padding: 10px;
+    height: 60px; /* Fixed height for input area */
+  }
+
+  /* Ensure buttons are easily tappable */
+  .toggle-button,
+  .close-button,
+  .hamburger-button {
+    padding: 8px;
+    margin: 0 4px;
+  }
+
+  /* Adjust input and send button for better mobile experience */
+  .input-area textarea {
+    font-size: 16px; /* Prevent zoom on input focus on iOS */
+  }
+
+  .send-button {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+/* iPhone-specific adjustments */
+@media screen and (max-width: 428px) { /* iPhone 12 Pro Max width */
+  .chat-popup {
+    /* Ensure full screen on iPhones with notches */
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .chat-header {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+
+  .input-area {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* ... rest of the existing styles ... */

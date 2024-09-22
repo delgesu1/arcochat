@@ -26,7 +26,7 @@ const App = () => {
 
     try {
       // Silently append the additional sentence to the content
-      const modifiedContent = `${message} (Please refer exclusively to your knowledge base and DO NOT make up information or use ANY outside knowledge. If what is being asked doesn't appear in your knowledge-base, simply reply "I don't have information on that topic". When answering violin and music related questions, always provide in-depth, step-by-step examples or exercises. If you think it's appropriate, identify and address potential common mistakes or challenges related to my question.)`;
+      const modifiedContent = `${message} (Please refer exclusively to your knowledge base and DO NOT make up information or use ANY outside knowledge. If what is being asked doesn't appear in your knowledge-base, simply reply "I don't have information on that topic".)`;
 
       const assistantResponse = await createAssistantConversation(
         modifiedContent,
