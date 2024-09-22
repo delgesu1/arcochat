@@ -18,9 +18,8 @@
   border-bottom-right-radius: 4px;
   max-width: 75%; /* Reduced from 90% to 75% */
 }
-
 .message.assistant {
-  background-color:#f7f7f7;
+  background-color: var(--assistant-message-color);
   color: var(--text-color);
   margin-right: auto;
   border-bottom-left-radius: 4px;
