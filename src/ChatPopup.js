@@ -22,33 +22,36 @@ export const ChatPopup = ({ isOpen, onClose }, ref) => {
   const [conversations, setConversations] = useState(() => {
     const today = new Date();
     const oneDay = 24 * 60 * 60 * 1000;
-    return [
-      { id: 1, title: "Vibrato Techniques for Beginners", date: today.toISOString().split('T')[0] },
-      { id: 2, title: "Proper Bow Hold for Smooth Sound", date: new Date(today - oneDay).toISOString().split('T')[0] },
-      { id: 3, title: "Scales Practice Routine", date: new Date(today - 2 * oneDay).toISOString().split('T')[0] },
-      { id: 4, title: "Improving Intonation", date: new Date(today - 2 * oneDay).toISOString().split('T')[0] },
-      { id: 5, title: "Shifting Positions Smoothly", date: new Date(today - 3 * oneDay).toISOString().split('T')[0] },
-      { id: 6, title: "Developing a Strong Left-Hand Frame", date: new Date(today - 3 * oneDay).toISOString().split('T')[0] },
-      { id: 7, title: "Bow Distribution Techniques", date: new Date(today - 4 * oneDay).toISOString().split('T')[0] },
+    const conversationList = [
+      { id: 1, title: "Vibrato Techniques for Beginners", date: new Date(today - 2 * oneDay).toISOString().split('T')[0] },
+      { id: 2, title: "Proper Bow Hold for Smooth Sound", date: new Date(today - 4 * oneDay).toISOString().split('T')[0] },
+      { id: 3, title: "Scales Practice Routine", date: new Date(today - oneDay).toISOString().split('T')[0] },
+      { id: 4, title: "Improving Intonation", date: new Date(today - 3 * oneDay).toISOString().split('T')[0] },
+      { id: 5, title: "Shifting Positions Smoothly", date: today.toISOString().split('T')[0] },
+      { id: 6, title: "Developing a Strong Left-Hand Frame", date: new Date(today - 2 * oneDay).toISOString().split('T')[0] },
+      { id: 7, title: "Bow Distribution Techniques", date: new Date(today - oneDay).toISOString().split('T')[0] },
       { id: 8, title: "Mastering Spiccato Bowing", date: new Date(today - 4 * oneDay).toISOString().split('T')[0] },
-      { id: 9, title: "Effective Warm-up Exercises", date: new Date(today - 5 * oneDay).toISOString().split('T')[0] },
-      { id: 10, title: "Sight-Reading Strategies", date: new Date(today - 5 * oneDay).toISOString().split('T')[0] },
-      { id: 11, title: "Practicing Difficult Passages", date: new Date(today - 5 * oneDay).toISOString().split('T')[0] },
-      { id: 12, title: "Developing Vibrato Speed", date: new Date(today - 6 * oneDay).toISOString().split('T')[0] },
-      { id: 13, title: "Improving Tone Quality", date: new Date(today - 6 * oneDay).toISOString().split('T')[0] },
-      { id: 14, title: "Memorization Techniques for Violinists", date: new Date(today - 6 * oneDay).toISOString().split('T')[0] },
-      { id: 15, title: "Efficient Practice Schedule", date: new Date(today - 7 * oneDay).toISOString().split('T')[0] },
-      { id: 16, title: "Overcoming Performance Anxiety", date: new Date(today - 7 * oneDay).toISOString().split('T')[0] },
-      { id: 17, title: "Developing Musical Expressiveness", date: new Date(today - 7 * oneDay).toISOString().split('T')[0] },
-      { id: 18, title: "Proper Posture for Violinists", date: new Date(today - 7 * oneDay).toISOString().split('T')[0] },
-      { id: 19, title: "Choosing the Right Strings", date: today.toISOString().split('T')[0] },
-      { id: 20, title: "Maintaining Your Violin", date: today.toISOString().split('T')[0] },
+      { id: 9, title: "Effective Warm-up Exercises", date: new Date(today - 3 * oneDay).toISOString().split('T')[0] },
+      { id: 10, title: "Sight-Reading Strategies", date: today.toISOString().split('T')[0] },
+      { id: 11, title: "Practicing Difficult Passages", date: new Date(today - 2 * oneDay).toISOString().split('T')[0] },
+      { id: 12, title: "Developing Vibrato Speed", date: new Date(today - 4 * oneDay).toISOString().split('T')[0] },
+      { id: 13, title: "Improving Tone Quality", date: new Date(today - oneDay).toISOString().split('T')[0] },
+      { id: 14, title: "Memorization Techniques for Violinists", date: new Date(today - 3 * oneDay).toISOString().split('T')[0] },
+      { id: 15, title: "Efficient Practice Schedule", date: today.toISOString().split('T')[0] },
+      { id: 16, title: "Overcoming Performance Anxiety", date: new Date(today - 2 * oneDay).toISOString().split('T')[0] },
+      { id: 17, title: "Developing Musical Expressiveness", date: new Date(today - 4 * oneDay).toISOString().split('T')[0] },
+      { id: 18, title: "Proper Posture for Violinists", date: new Date(today - oneDay).toISOString().split('T')[0] },
+      { id: 19, title: "Choosing the Right Strings", date: new Date(today - 3 * oneDay).toISOString().split('T')[0] },
+      { id: 20, title: "Maintaining Your Violin", date: new Date(today - 2 * oneDay).toISOString().split('T')[0] },
     ];
+    
+    // Sort conversations by date, newest first
+    return conversationList.sort((a, b) => new Date(b.date) - new Date(a.date));
   });
 
   useEffect(() => {
     // Generate welcome message with random questions when the component mounts
-    const randomQuestions = getRandomQuestions(4);
+    const randomQuestions = getRandomQuestions(5); // Changed from 4 to 5
     const welcomeMessage = {
       role: 'assistant',
       content: `🎻 Hello and welcome! I'm Professor Arco AI, your expert violin mentor. Whether you're looking to refine your technique, enhance your musicality, or develop healthy practice habits, I'm here to help you achieve your goals. With detailed, step-by-step guidance, I can assist you in overcoming challenges and mastering the violin. Let's make your violin journey both productive and enjoyable! You can try asking me questions such as:
@@ -65,8 +68,11 @@ ${randomQuestions.map(q => `- ${q}`).join('\n')}`
   }, [messages]);
 
   const handleSendMessage = async (content) => {
-    // Add user's message to the message list
+    // Add user's visible message to the message list
     setMessages(prevMessages => [...prevMessages, { role: 'user', content }]);
+
+    // Silently append the additional sentence to the content
+    const modifiedContent = `${content} (Please refer exclusively to your knowledge base via file search and do not make up answers or use outside knowledge. Always try to provide in-depth, step-by-step exercises and examples that are relevant to my question. If applicable, identify and address potential common mistakes or challenges related to my question.)`;
 
     // Add an empty assistant message to hold streaming content
     const assistantMessage = { role: 'assistant', content: '' };
@@ -78,7 +84,8 @@ ${randomQuestions.map(q => `- ${q}`).join('\n')}`
     abortControllerRef.current = new AbortController();
 
     try {
-      await createAssistantConversation(content, (chunk) => {
+      // Use the modifiedContent in the API call
+      await createAssistantConversation(modifiedContent, (chunk) => {
         setMessages(prevMessages => {
           const lastMessage = prevMessages[prevMessages.length - 1];
           if (lastMessage && lastMessage.role === 'assistant') {

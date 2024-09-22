@@ -12,7 +12,7 @@ console.log('Raw env variables:', {
   export const OPENAI_API_KEY = process.env.REACT_APP_OPENAI_API_KEY;
   export const ASSISTANT_ID = process.env.REACT_APP_OPENAI_ASSISTANT_ID;
   export const VECTOR_STORE_ID = process.env.REACT_APP_VECTOR_STORE_ID;
-  export const MODEL_ID = process.env.REACT_APP_MODEL_ID; // Add this line if MODEL_ID is needed
+  export const MODEL_ID = process.env.REACT_APP_MODEL_ID || 'gpt-4o-mini'; // Update default model
   
   // Log processed configuration (for debugging, remove in production)
   console.log('Processed config:', {

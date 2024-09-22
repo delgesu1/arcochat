@@ -1,7 +1,7 @@
 .message {
   position: relative;
   display: inline-block;
-  max-width: 90%;
+  max-width: 75%; /* Reduced from 90% to 75% */
   padding: 10px 14px;
   margin-bottom: 24px;
   border-radius: var(--border-radius);
@@ -16,6 +16,7 @@
   color: var(--secondary-color);
   margin-left: auto;
   border-bottom-right-radius: 4px;
+  max-width: 75%; /* Reduced from 90% to 75% */
 }
 
 .message.assistant {

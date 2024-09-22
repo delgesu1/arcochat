@@ -1,5 +1,5 @@
 // src/api.js
-import { OPENAI_API_KEY, ASSISTANT_ID } from './config';
+import { OPENAI_API_KEY, ASSISTANT_ID, MODEL_ID } from './config';
 
 const headers = {
   'Content-Type': 'application/json',
@@ -7,11 +7,14 @@ const headers = {
   'OpenAI-Beta': 'assistants=v2'
 };
 
-export const createAssistantConversation = async (userMessage, onChunkReceived, abortSignal) => {
-  if (!OPENAI_API_KEY || !ASSISTANT_ID) {
-    console.error('API key or Assistant ID is missing');
+export const createAssistantConversation = async (content, onChunk, signal) => {
+  console.log('Content received by createAssistantConversation:', content);
+
+  if (!OPENAI_API_KEY || !ASSISTANT_ID || !MODEL_ID) {
+    console.error('API key, Assistant ID, or Model ID is missing');
     console.log('OPENAI_API_KEY:', OPENAI_API_KEY ? 'Set' : 'Not set');
     console.log('ASSISTANT_ID:', ASSISTANT_ID ? 'Set' : 'Not set');
+    console.log('MODEL_ID:', MODEL_ID ? 'Set' : 'Not set');
     throw new Error('Configuration error. Please check your API settings.');
   }
 
@@ -22,7 +25,7 @@ export const createAssistantConversation = async (userMessage, onChunkReceived, 
       method: 'POST',
       headers: headers,
       body: JSON.stringify({ /* your thread data if needed */ }),
-      signal: abortSignal,
+      signal: signal,
     });
 
     if (!threadResponse.ok) {
@@ -39,9 +42,9 @@ export const createAssistantConversation = async (userMessage, onChunkReceived, 
       headers: headers,
       body: JSON.stringify({
         role: 'user',
-        content: userMessage,
+        content: content,
       }),
-      signal: abortSignal,
+      signal: signal,
     });
 
     // Run the assistant
@@ -51,8 +54,9 @@ export const createAssistantConversation = async (userMessage, onChunkReceived, 
       headers: headers,
       body: JSON.stringify({ 
         assistant_id: ASSISTANT_ID,
+        model: MODEL_ID, // Add this line to specify the model
       }),
-      signal: abortSignal,
+      signal: signal,
     });
 
     if (!runResponse.ok) {
@@ -68,7 +72,7 @@ export const createAssistantConversation = async (userMessage, onChunkReceived, 
       await new Promise(resolve => setTimeout(resolve, 1000));
       const statusResponse = await fetch(`https://api.openai.com/v1/threads/${threadId}/runs/${runId}`, {
         headers: headers,
-        signal: abortSignal,
+        signal: signal,
       });
       const statusData = await statusResponse.json();
       runStatus = statusData.status;
@@ -82,15 +86,15 @@ export const createAssistantConversation = async (userMessage, onChunkReceived, 
       // Retrieve messages
       const messagesResponse = await fetch(`https://api.openai.com/v1/threads/${threadId}/messages`, {
         headers: headers,
-        signal: abortSignal,
+        signal: signal,
       });
       const messagesData = await messagesResponse.json();
       
       // Process the assistant's message
       const assistantMessage = processMessage(messagesData.data[0]);
       
-      if (onChunkReceived) {
-        onChunkReceived(assistantMessage);
+      if (onChunk) {
+        onChunk(assistantMessage);
       }
       
       console.log('Assistant message received:', assistantMessage);
@@ -106,26 +110,31 @@ export const createAssistantConversation = async (userMessage, onChunkReceived, 
 
 // Helper function to process messages and handle annotations
 function processMessage(message) {
-  let processedContent = message.content[0].text.value;
-  const annotations = message.content[0].text.annotations || [];
-  
-  // Process annotations (file citations, file paths, etc.)
-  annotations.forEach((annotation, index) => {
-    if (annotation.file_citation) {
-      processedContent = processedContent.replace(
-        annotation.text,
-        `[${index + 1}]`
-      );
-      processedContent += `\n[${index + 1}] ${annotation.file_citation.quote} (File: ${annotation.file_citation.file_id})`;
-    } else if (annotation.file_path) {
-      processedContent = processedContent.replace(
-        annotation.text,
-        `[File: ${annotation.file_path.file_id}]`
-      );
-    }
-  });
+  try {
+    console.log('Raw message content:', message.content);
+    console.log('Annotations:', message.content[0].text.annotations);
 
-  return processedContent;
+    let processedContent = message.content[0].text.value;
+    const annotations = message.content[0].text.annotations || [];
+    
+    // Remove citation markers from the text
+    annotations.forEach((annotation) => {
+      if (annotation.file_citation || annotation.file_path) {
+        processedContent = processedContent.replace(annotation.text, '');
+      }
+    });
+
+    // Remove any remaining citation numbers and brackets
+    processedContent = processedContent.replace(/\[\d+\]/g, '');
+
+    // Trim any extra whitespace that might be left after removing citations
+    processedContent = processedContent.trim();
+
+    return processedContent;
+  } catch (error) {
+    console.error('Error processing message:', error);
+    return message.content[0].text.value; // Return raw content if processing fails
+  }
 }
 
 export const testAPIConnection = async () => {

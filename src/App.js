@@ -25,8 +25,11 @@ const App = () => {
     abortControllerRef.current = new AbortController();
 
     try {
+      // Silently append the additional sentence to the content
+      const modifiedContent = `${message} (Please refer exclusively to your knowledge base via file search and do not make up answers or use outside knowledge. Always try to provide in-depth, step-by-step exercises and examples that are relevant to my question. If applicable, identify and address potential common mistakes or challenges related to my question.)`;
+
       const assistantResponse = await createAssistantConversation(
-        message,
+        modifiedContent,
         (chunk) => {
           setMessages((prevMessages) => {
             const lastMessage = prevMessages[prevMessages.length - 1];
