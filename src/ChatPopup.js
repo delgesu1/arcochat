@@ -72,7 +72,7 @@ ${randomQuestions.map(q => `- ${q}`).join('\n')}`
     setMessages(prevMessages => [...prevMessages, { role: 'user', content }]);
 
     // Silently append the additional sentence to the content
-    const modifiedContent = `${content} (Please refer exclusively to your knowledge base via file search and do not make up answers or use outside knowledge. Always try to provide in-depth, step-by-step exercises and examples that are relevant to my question. If applicable, identify and address potential common mistakes or challenges related to my question.)`;
+    const modifiedContent = `${content} (Please refer exclusively to your knowledge base via file search and do not make up answers or use outside knowledge. Always provide in-depth, step-by-step exercises and examples that are relevant to my question. If applicable, identify and address potential common mistakes or challenges related to my question.)`;
 
     // Add an empty assistant message to hold streaming content
     const assistantMessage = { role: 'assistant', content: '' };
