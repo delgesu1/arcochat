@@ -1,13 +1,12 @@
 // src/ChatPopup.js
 
 import React, { useState, useEffect, useRef, forwardRef } from 'react';
-import { FiMenu, FiMaximize2, FiMinimize2, FiX } from 'react-icons/fi'; // Add FiMenu
+import { FiMenu, FiMaximize2, FiMinimize2, FiX } from 'react-icons/fi';
 import { MessageList } from './MessageList';
 import { InputArea } from './InputArea';
 import { createAssistantConversation } from './api';
 import './ChatPopup.css';
-import ConversationHistory from './ConversationHistory'; // New component we'll create
-import { format, subDays } from 'date-fns'; // Make sure to install date-fns: npm install date-fns
+import ConversationHistory from './ConversationHistory';
 
 export const ChatPopup = ({ isOpen, onClose }, ref) => {
   const [messages, setMessages] = useState([]);
@@ -21,30 +20,28 @@ export const ChatPopup = ({ isOpen, onClose }, ref) => {
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [conversations, setConversations] = useState(() => {
     const today = new Date();
+    const oneDay = 24 * 60 * 60 * 1000;
     return [
-      { id: 1, title: "Vibrato Techniques for Beginners", date: format(today, 'yyyy-MM-dd') },
-      { id: 2, title: "Improving Bow Control", date: format(today, 'yyyy-MM-dd') },
-      { id: 3, title: "Left Hand Positioning Tips", date: format(today, 'yyyy-MM-dd') },
-      { id: 4, title: "Mastering Spiccato Bowing", date: format(subDays(today, 1), 'yyyy-MM-dd') },
-      { id: 5, title: "Violin Posture and Ergonomics", date: format(subDays(today, 1), 'yyyy-MM-dd') },
-      { id: 6, title: "Intonation Exercises for Violinists", date: format(subDays(today, 1), 'yyyy-MM-dd') },
-      { id: 7, title: "Shifting Techniques: Smooth Transitions", date: format(subDays(today, 1), 'yyyy-MM-dd') },
-      { id: 8, title: "Double Stop Practice Strategies", date: format(subDays(today, 1), 'yyyy-MM-dd') },
-      { id: 9, title: "Developing a Rich Violin Tone", date: format(subDays(today, 1), 'yyyy-MM-dd') },
-      { id: 10, title: "Violin Fingering Charts and Tips", date: format(subDays(today, 1), 'yyyy-MM-dd') },
-      { id: 11, title: "Advanced Bowing Techniques", date: format(subDays(today, 1), 'yyyy-MM-dd') },
-      { id: 12, title: "Practicing Scales Effectively", date: format(subDays(today, 1), 'yyyy-MM-dd') },
-      { id: 13, title: "Violin Maintenance and Care", date: format(subDays(today, 1), 'yyyy-MM-dd') },
-      { id: 14, title: "Improving Sight-Reading Skills", date: format(subDays(today, 1), 'yyyy-MM-dd') },
-      { id: 15, title: "Left Hand Tension Relief Exercises", date: format(subDays(today, 2), 'yyyy-MM-dd') },
-      { id: 16, title: "Slow Practice Techniques for Accuracy", date: format(subDays(today, 2), 'yyyy-MM-dd') },
-      { id: 17, title: "Vibrato Speed and Width Control", date: format(subDays(today, 2), 'yyyy-MM-dd') },
-      { id: 18, title: "Bow Distribution for Long Phrases", date: format(subDays(today, 2), 'yyyy-MM-dd') },
-      { id: 19, title: "Pizzicato Techniques for Violinists", date: format(subDays(today, 3), 'yyyy-MM-dd') },
-      { id: 20, title: "Harmonics: Natural and Artificial", date: format(subDays(today, 3), 'yyyy-MM-dd') },
-      { id: 21, title: "Violin Shoulder Rest Adjustments", date: format(subDays(today, 4), 'yyyy-MM-dd') },
-      { id: 22, title: "Developing Consistent Violin Practice", date: format(subDays(today, 5), 'yyyy-MM-dd') },
-      { id: 23, title: "Overcoming Performance Anxiety", date: format(subDays(today, 5), 'yyyy-MM-dd') },
+      { id: 1, title: "Vibrato Techniques for Beginners", date: today.toISOString().split('T')[0] },
+      { id: 2, title: "Proper Bow Hold for Smooth Sound", date: new Date(today - oneDay).toISOString().split('T')[0] },
+      { id: 3, title: "Scales Practice Routine", date: new Date(today - 2 * oneDay).toISOString().split('T')[0] },
+      { id: 4, title: "Improving Intonation", date: new Date(today - 2 * oneDay).toISOString().split('T')[0] },
+      { id: 5, title: "Shifting Positions Smoothly", date: new Date(today - 3 * oneDay).toISOString().split('T')[0] },
+      { id: 6, title: "Developing a Strong Left-Hand Frame", date: new Date(today - 3 * oneDay).toISOString().split('T')[0] },
+      { id: 7, title: "Bow Distribution Techniques", date: new Date(today - 4 * oneDay).toISOString().split('T')[0] },
+      { id: 8, title: "Mastering Spiccato Bowing", date: new Date(today - 4 * oneDay).toISOString().split('T')[0] },
+      { id: 9, title: "Effective Warm-up Exercises", date: new Date(today - 5 * oneDay).toISOString().split('T')[0] },
+      { id: 10, title: "Sight-Reading Strategies", date: new Date(today - 5 * oneDay).toISOString().split('T')[0] },
+      { id: 11, title: "Practicing Difficult Passages", date: new Date(today - 5 * oneDay).toISOString().split('T')[0] },
+      { id: 12, title: "Developing Vibrato Speed", date: new Date(today - 6 * oneDay).toISOString().split('T')[0] },
+      { id: 13, title: "Improving Tone Quality", date: new Date(today - 6 * oneDay).toISOString().split('T')[0] },
+      { id: 14, title: "Memorization Techniques for Violinists", date: new Date(today - 6 * oneDay).toISOString().split('T')[0] },
+      { id: 15, title: "Efficient Practice Schedule", date: new Date(today - 7 * oneDay).toISOString().split('T')[0] },
+      { id: 16, title: "Overcoming Performance Anxiety", date: new Date(today - 7 * oneDay).toISOString().split('T')[0] },
+      { id: 17, title: "Developing Musical Expressiveness", date: new Date(today - 7 * oneDay).toISOString().split('T')[0] },
+      { id: 18, title: "Proper Posture for Violinists", date: new Date(today - 7 * oneDay).toISOString().split('T')[0] },
+      { id: 19, title: "Choosing the Right Strings", date: today.toISOString().split('T')[0] },
+      { id: 20, title: "Maintaining Your Violin", date: today.toISOString().split('T')[0] },
     ];
   });
 
@@ -55,31 +52,51 @@ export const ChatPopup = ({ isOpen, onClose }, ref) => {
   }, [messages]);
 
   const handleSendMessage = async (content) => {
-    const newMessage = { role: 'user', content };
-    setMessages(prevMessages => [...prevMessages, newMessage]);
+    // Add user's message to the message list
+    setMessages(prevMessages => [...prevMessages, { role: 'user', content }]);
+
+    // Add an empty assistant message to hold streaming content
+    const assistantMessage = { role: 'assistant', content: '' };
+    setMessages(prevMessages => [...prevMessages, assistantMessage]);
+
     setIsTyping(true);
 
+    // Initialize AbortController to handle cancellation
     abortControllerRef.current = new AbortController();
 
     try {
-      const assistantResponse = await createAssistantConversation(content, abortControllerRef.current.signal);
-      setMessages(prevMessages => [
-        ...prevMessages,
-        { role: 'assistant', content: assistantResponse },
-      ]);
+      await createAssistantConversation(content, (chunk) => {
+        setMessages(prevMessages => {
+          const lastMessage = prevMessages[prevMessages.length - 1];
+          if (lastMessage && lastMessage.role === 'assistant') {
+            // Append the new chunk to the assistant's message
+            const updatedMessage = {
+              ...lastMessage,
+              content: lastMessage.content + chunk,
+            };
+            const updatedMessages = [...prevMessages];
+            updatedMessages[updatedMessages.length - 1] = updatedMessage;
+            return updatedMessages;
+          } else {
+            // If the last message isn't assistant, add a new one
+            return [...prevMessages, { role: 'assistant', content: chunk }];
+          }
+        });
+      }, abortControllerRef.current.signal);
     } catch (error) {
-      if (error.name === 'AbortError' || error.message === 'Fetch aborted') {
-        console.log('Fetch aborted');
-        // Restore the user's message back to the input field
-        if (inputAreaRef.current && typeof inputAreaRef.current.restoreMessage === 'function') {
-          inputAreaRef.current.restoreMessage(content);
-        }
-        // Do not add any system message
+      if (error.name === 'AbortError') {
+        // Handle fetch cancellation
+        setMessages(prevMessages => [
+          ...prevMessages,
+          { role: 'system', content: 'AI response was canceled.' },
+        ]);
+        // Optionally, remove the empty assistant message
+        setMessages(prevMessages => prevMessages.slice(0, -1));
       } else {
         console.error('Error in handleSendMessage:', error);
         let errorMessage = 'An error occurred while processing your request. ';
-        if (error.message.includes('Run did not complete in time')) {
-          errorMessage += 'The assistant is taking longer than expected to respond. Please try again.';
+        if (error.message.includes('Rate limit')) {
+          errorMessage += 'You are sending messages too quickly. Please wait and try again.';
         } else {
           errorMessage += 'Please try again later or contact support if the problem persists.';
         }
@@ -110,9 +127,9 @@ export const ChatPopup = ({ isOpen, onClose }, ref) => {
   };
 
   const selectConversation = (conversationId) => {
-    // Here you would implement the logic to load the selected conversation
+    // Implement logic to load the selected conversation
     console.log(`Selected conversation: ${conversationId}`);
-    setIsHistoryOpen(false); // Close the history popup after selection
+    setIsHistoryOpen(false);
   };
 
   const closeHistory = () => {
@@ -127,7 +144,7 @@ export const ChatPopup = ({ isOpen, onClose }, ref) => {
         <ConversationHistory
           conversations={conversations}
           onSelectConversation={selectConversation}
-          onClose={closeHistory}  // This function will be called when X is clicked
+          onClose={closeHistory}
           isOpen={isHistoryOpen}
         />
       )}

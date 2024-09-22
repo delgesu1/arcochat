@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ChatPopup } from './ChatPopup';
 import { ChatIcon } from './ChatIcon';
-import { testAPIConnection } from './api';
+import { createAssistantConversation } from './api';
 import './App.css';
 
 const App = () => {
@@ -10,63 +10,50 @@ const App = () => {
   const [isTyping, setIsTyping] = useState(false);
   const abortControllerRef = useRef(null);
 
-  useEffect(() => {
-    testAPIConnection().then(result => {
-      if (!result) {
-        console.error('Failed to connect to OpenAI API. Please check your API key and permissions.');
-      }
-    });
-  }, []);
-
   const togglePopup = () => {
     console.log('Toggling popup, current state:', isPopupOpen);
     setIsPopupOpen(prevState => !prevState);
   };
 
   const handleSendMessage = async (message) => {
-    // Add user's message to the message list
     setMessages((prevMessages) => [
       ...prevMessages,
       { role: 'user', content: message },
     ]);
 
-    // Set isTyping to true to indicate AI is generating a response
     setIsTyping(true);
-
-    // Initialize AbortController to handle cancellation
     abortControllerRef.current = new AbortController();
 
     try {
-      // Replace the following fetch URL with your AI backend endpoint
-      const response = await fetch(`${process.env.REACT_APP_API_ENDPOINT}/generate`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const assistantResponse = await createAssistantConversation(
+        message,
+        (chunk) => {
+          setMessages((prevMessages) => {
+            const lastMessage = prevMessages[prevMessages.length - 1];
+            if (lastMessage.role === 'assistant') {
+              return [
+                ...prevMessages.slice(0, -1),
+                { ...lastMessage, content: lastMessage.content + chunk },
+              ];
+            } else {
+              return [...prevMessages, { role: 'assistant', content: chunk }];
+            }
+          });
         },
-        body: JSON.stringify({ prompt: message }),
-        signal: abortControllerRef.current.signal, // Attach the AbortController's signal
-      });
+        abortControllerRef.current.signal
+      );
 
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-
-      const data = await response.json();
-
-      // Add AI's response to the message list
       setMessages((prevMessages) => [
         ...prevMessages,
-        { role: 'assistant', content: data.response },
+        { role: 'assistant', content: assistantResponse },
       ]);
     } catch (error) {
       if (error.name === 'AbortError') {
-        // Handle fetch cancellation
         setMessages((prevMessages) => [
           ...prevMessages,
           { role: 'system', content: 'AI response was canceled.' },
         ]);
       } else {
-        // Handle other errors
         setMessages((prevMessages) => [
           ...prevMessages,
           { role: 'system', content: 'An error occurred while fetching the AI response.' },

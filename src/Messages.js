@@ -1,18 +1,51 @@
 // src/Messages.js
 
-import React, { useEffect, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { FiCopy } from 'react-icons/fi'; // Import the copy icon
+import { marked } from 'marked'; // Import the marked library
 import './Messages.css';
 
 export const Message = ({ role, content }) => {
+  const [isCopied, setIsCopied] = useState(false);
+
   if (!content) return null;
+
+  const handleCopy = () => {
+    // Convert Markdown to HTML
+    const htmlContent = marked(content);
+    
+    // Use a temporary element to strip HTML tags for plain text
+    const tempElement = document.createElement('div');
+    tempElement.innerHTML = htmlContent;
+    const plainText = tempElement.textContent || tempElement.innerText;
+
+    // Copy the HTML content to clipboard
+    navigator.clipboard.write([
+      new ClipboardItem({
+        'text/html': new Blob([htmlContent], { type: 'text/html' }),
+        'text/plain': new Blob([plainText], { type: 'text/plain' })
+      })
+    ]).then(() => {
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    }).catch(err => {
+      console.error('Failed to copy: ', err);
+    });
+  };
 
   return (
     <div className={`message ${role}`}>
       <ReactMarkdown remarkPlugins={[remarkGfm]}>
         {content}
       </ReactMarkdown>
+      {role === 'assistant' && content && (
+        <button className="copy-button" onClick={handleCopy} title="Copy to clipboard">
+          <FiCopy />
+          {isCopied && <span className="copied-tooltip">Copied!</span>}
+        </button>
+      )}
     </div>
   );
 };
