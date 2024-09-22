@@ -1,0 +1,78 @@
+/* src/InputArea.css */
+
+.input-area {
+  padding: 8px 16px;
+  background-color: var(--background-color);
+  border-top: 1px solid var(--light-gray);
+  display: flex;                /* Use flex layout */
+  align-items: center;          /* Center items vertically */
+  gap: 8px;                     /* Space between textarea and button */
+}
+
+.input-area textarea {
+  width: 100%; /* Ensure it occupies full available width */
+  flex: 1;                      /* Allow textarea to grow and fill space */
+  height: 24px;
+  min-height: 24px;
+  max-height: 150px;
+  padding: 8px 12px;            /* Adjust padding */
+  border: 1px solid var(--light-gray);
+  border-radius: 20px;          /* Apply rounded corners */
+  font-size: 14px;
+  line-height: 24px;
+  background-color: #ffffff;
+  resize: none;
+  overflow-y: hidden;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  font-family: var(--font-family);
+  box-sizing: border-box;       /* Include padding and border in height */
+}
+
+.input-area textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(85, 108, 214, 0.1);
+}
+
+.send-button {
+  background-color: var(--primary-color);
+  color: #ffffff;
+  border: none;
+  border-radius: 20px;          /* Apply rounded corners */
+  width: 44px;
+  height: 44px;                 /* Make button square */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  flex-shrink: 0;               /* Prevent button from shrinking */
+}
+
+.send-button:hover {
+  background-color: #4757c1;
+}
+
+.send-button:active {
+  transform: scale(0.95);
+}
+
+.send-button:disabled {
+  background-color: var(--light-gray);
+  cursor: not-allowed;
+}
+
+.send-button svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+
+/* Styling for Stop Button */
+.send-button.stop-button {
+  background-color: #e74c3c; /* Red color for Stop */
+}
+
+.send-button.stop-button:hover {
+  background-color: #c0392b;
+}

@@ -1,0 +1,70 @@
+/* Updated styles for Messages */
+
+.message {
+  display: inline-block;
+  max-width: 90%; /* Increased from 75% to 90% */
+  padding: 10px 14px;
+  margin-bottom: 8px;
+  border-radius: var(--border-radius);
+  font-size: 15px;
+  line-height: 1.5;
+  word-break: break-word;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+.message.user {
+  background-color: var(--user-message-color);
+  color: var(--secondary-color);
+  margin-left: auto;
+  border-bottom-right-radius: 4px; /* Slight corner adjustment */
+}
+
+.message.assistant {
+  background-color: var(--assistant-message-color);
+  color: var(--text-color);
+  margin-right: auto;
+  border-bottom-left-radius: 4px; /* Slight corner adjustment */
+}
+
+.message.system {
+  background-color: #ffeaa7;
+  color: #2d3436;
+  align-self: center;
+  border-radius: var(--border-radius);
+}
+
+.message p {
+  margin: 0;
+}
+
+.message p + p {
+  margin-top: 8px;
+}
+
+.message pre {
+  margin: 8px 0;
+  padding: 8px;
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+  overflow-x: auto;
+}
+
+.message code {
+  background-color: rgba(0, 0, 0, 0.05);
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+/* Typing Indicator Styling */
+.typing-indicator {
+  font-style: italic;
+  opacity: 0.7;
+  color: var(--dark-gray);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 600px) {
+  .message {
+    max-width: 95%; /* Increase width on smaller screens */
+  }
+}

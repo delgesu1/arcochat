@@ -1,66 +1,78 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useImperativeHandle, forwardRef } from 'react';
+import './InputArea.css';
 
-export const InputArea = ({ onSendMessage, isTyping, onCancelResponse }) => {
+export const InputArea = forwardRef(({ onSendMessage, onCancel, isTyping }, ref) => {
   const [message, setMessage] = useState('');
   const textareaRef = useRef(null);
 
+  // Expose the restoreMessage method to parent via ref
+  useImperativeHandle(ref, () => ({
+    restoreMessage: (msg) => {
+      setMessage(msg);
+      // Optionally, focus the textarea after restoring
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+      }
+    },
+  }));
+
   useEffect(() => {
-    adjustTextareaHeight();
+    if (textareaRef.current) {
+      textareaRef.current.style.height = '40px'; // Reset to default height
+      const scrollHeight = textareaRef.current.scrollHeight;
+      textareaRef.current.style.height = `${scrollHeight}px`;
+    }
   }, [message]);
 
-  const adjustTextareaHeight = () => {
-    const textarea = textareaRef.current;
-    if (textarea) {
-      textarea.style.height = 'auto';
-      textarea.style.height = `${textarea.scrollHeight}px`;
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey && !isTyping) {
+      e.preventDefault();
+      handleSend();
     }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (message.trim() && !isTyping) {
+  const handleSend = () => {
+    if (message.trim()) {
       onSendMessage(message.trim());
       setMessage('');
     }
   };
 
-  const handleChange = (e) => {
-    setMessage(e.target.value);
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSubmit(e);
+  const handleCancel = () => {
+    if (isTyping) {
+      onCancel();
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="input-area">
+    <div className="input-area">
       <textarea
         ref={textareaRef}
         value={message}
-        onChange={handleChange}
+        onChange={(e) => setMessage(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="Type a message..."
+        placeholder="Type your message..."
         disabled={isTyping}
         rows={1}
       />
-      {isTyping ? (
-        <button type="button" onClick={onCancelResponse} className="cancel-button">
-          <svg viewBox="0 0 24 24" width="24" height="24">
-            <circle cx="12" cy="12" r="11" fill="currentColor" />
-            <rect x="8" y="8" width="8" height="8" fill="#ffffff" />
+      <button
+        className={`send-button ${isTyping ? 'stop-button' : ''}`}
+        onClick={isTyping ? handleCancel : handleSend}
+        disabled={!isTyping && !message.trim()}
+        aria-label={isTyping ? "Cancel AI Response" : "Send message"}
+      >
+        {isTyping ? (
+          /* Stop (Cancel) icon */
+          <svg viewBox="0 0 24 24">
+            <path d="M6 6L18 18M6 18L18 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
           </svg>
-        </button>
-      ) : (
-        <button type="submit" disabled={!message.trim() || isTyping}>
-          <svg viewBox="0 0 24 24" width="24" height="24">
-            <circle cx="12" cy="12" r="11" fill="currentColor" />
-            <path d="M8 12l4-4 4 4m-4-4v8" stroke="#fff" strokeWidth="2" fill="none" />
+        ) : (
+          /* Send icon */
+          <svg viewBox="0 0 24 24">
+            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
           </svg>
-        </button>
-      )}
-    </form>
+        )}
+      </button>
+    </div>
   );
-};
+});

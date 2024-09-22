@@ -1,101 +1,156 @@
-import { createOrUpdateAssistant } from './assistantSetup';
-import OpenAI from "openai";
+import { OPENAI_API_KEY, ASSISTANT_ID } from './config';
 
-const openai = new OpenAI({ apiKey: process.env.REACT_APP_OPENAI_API_KEY });
-const ASSISTANT_ID = process.env.REACT_APP_OPENAI_ASSISTANT_ID;
-const VECTOR_STORE_ID = process.env.REACT_APP_VECTOR_STORE_ID;
+const API_BASE_URL = 'https://api.openai.com/v1';
 
-console.log('Assistant ID:', ASSISTANT_ID);
-console.log('Vector Store ID:', VECTOR_STORE_ID);
-
-export const initializeAssistant = async () => {
-  try {
-    const assistant = await openai.beta.assistants.retrieve(ASSISTANT_ID);
-    console.log('Using pre-configured assistant:', ASSISTANT_ID);
-    return assistant;
-  } catch (error) {
-    console.error('Error retrieving assistant:', error);
-    throw error;
-  }
+const headers = {
+  'Content-Type': 'application/json',
+  'Authorization': `Bearer ${OPENAI_API_KEY}`,
+  'OpenAI-Beta': 'assistants=v2',
 };
 
-export const createThread = async () => {
+export const createAssistantConversation = async (userMessage, abortSignal) => {
   try {
-    return await openai.beta.threads.create();
-  } catch (error) {
-    console.error('Error creating thread:', error);
-    throw error;
-  }
-};
-
-export const addMessage = async (threadId, content) => {
-  try {
-    return await openai.beta.threads.messages.create(threadId, {
-      role: 'user',
-      content: content
+    // Step 1: Create a new thread
+    const threadResponse = await fetch(`${API_BASE_URL}/threads`, {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify({}),
+      signal: abortSignal, // Attach abort signal
     });
-  } catch (error) {
-    console.error('Error adding message:', error);
-    throw error;
-  }
-};
 
-export const runAssistant = async (threadId) => {
-  try {
-    return await openai.beta.threads.runs.create(threadId, {
-      assistant_id: ASSISTANT_ID,
-      model: 'gpt-4-1106-preview', // Updated model name
-      tools: [{ type: "retrieval" }],
-      metadata: {
-        vector_store_id: VECTOR_STORE_ID
+    if (!threadResponse.ok) {
+      const errorBody = await threadResponse.text();
+      console.error(`Failed to create thread: ${threadResponse.status}`, errorBody);
+      throw new Error(`Failed to create thread: ${threadResponse.status} - ${errorBody}`);
+    }
+
+    const thread = await threadResponse.json();
+    const threadId = thread.id;
+
+    // Step 2: Add a message to the thread
+    const messageResponse = await fetch(`${API_BASE_URL}/threads/${threadId}/messages`, {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify({
+        role: 'user',
+        content: userMessage,
+      }),
+      signal: abortSignal, // Attach abort signal
+    });
+
+    if (!messageResponse.ok) {
+      throw new Error(`Failed to add message: ${messageResponse.status}`);
+    }
+
+    // Step 3: Run the assistant
+    const runResponse = await fetch(`${API_BASE_URL}/threads/${threadId}/runs`, {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify({
+        assistant_id: ASSISTANT_ID,
+      }),
+      signal: abortSignal, // Attach abort signal
+    });
+
+    if (!runResponse.ok) {
+      const errorBody = await runResponse.text();
+      console.error(`Failed to run assistant: ${runResponse.status}`, errorBody);
+      throw new Error(`Failed to run assistant: ${runResponse.status} - ${errorBody}`);
+    }
+
+    const run = await runResponse.json();
+
+    // Step 4: Wait for the run to complete
+    const maxAttempts = 30;
+    const delayBetweenAttempts = 2000; // 2 seconds
+    let attempts = 0;
+    let runStatus;
+
+    while (attempts < maxAttempts) {
+      if (abortSignal.aborted) {
+        throw new Error('Fetch aborted');
       }
-    });
-  } catch (error) {
-    console.error('Error running assistant:', error);
-    throw error;
-  }
-};
 
-export const getRunStatus = async (threadId, runId) => {
-  try {
-    return await openai.beta.threads.runs.retrieve(threadId, runId);
-  } catch (error) {
-    console.error('Error getting run status:', error);
-    throw error;
-  }
-};
+      const statusResponse = await fetch(`${API_BASE_URL}/threads/${threadId}/runs/${run.id}`, {
+        headers: headers,
+        signal: abortSignal, // Attach abort signal
+      });
 
-export const getMessages = async (threadId) => {
-  try {
-    return await openai.beta.threads.messages.list(threadId);
-  } catch (error) {
-    console.error('Error getting messages:', error);
-    throw error;
-  }
-};
+      if (!statusResponse.ok) {
+        const errorBody = await statusResponse.text();
+        console.error(`Failed to get run status: ${statusResponse.status}`, errorBody);
+        throw new Error(`Failed to get run status: ${statusResponse.status} - ${errorBody}`);
+      }
 
-export const streamAssistantResponse = async (threadId, runId, onToken) => {
-  let done = false;
-  while (!done) {
-    try {
-      const runStatus = await getRunStatus(threadId, runId);
-      
+      runStatus = await statusResponse.json();
+      console.log(`Run status (attempt ${attempts + 1}):`, runStatus.status);
+
       if (runStatus.status === 'completed') {
-        const messages = await getMessages(threadId);
-        const lastMessage = messages.data[0];
-        if (lastMessage && lastMessage.role === 'assistant') {
-          onToken(lastMessage.content[0].text.value);
-        }
-        done = true;
-      } else if (runStatus.status === 'failed') {
-        console.error('Run failed:', runStatus.last_error);
-        throw new Error('Run failed: ' + runStatus.last_error?.message);
-      } else {
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        break;
+      } else if (runStatus.status === 'failed' || runStatus.status === 'cancelled') {
+        throw new Error(`Run ${runStatus.status}: ${JSON.stringify(runStatus.last_error)}`);
       }
-    } catch (error) {
-      console.error('Error in streamAssistantResponse:', error);
+
+      await new Promise(resolve => setTimeout(resolve, delayBetweenAttempts));
+      attempts++;
+    }
+
+    if (runStatus.status !== 'completed') {
+      console.error('Run did not complete in time. Final status:', runStatus);
+      throw new Error(`Run did not complete in time. Final status: ${runStatus.status}`);
+    }
+
+    // Step 5: Retrieve the assistant's messages
+    const messagesResponse = await fetch(`${API_BASE_URL}/threads/${threadId}/messages`, {
+      headers: headers,
+      signal: abortSignal, // Attach abort signal
+    });
+
+    if (!messagesResponse.ok) {
+      const errorBody = await messagesResponse.text();
+      console.error(`Failed to retrieve messages: ${messagesResponse.status}`, errorBody);
+      throw new Error(`Failed to retrieve messages: ${messagesResponse.status} - ${errorBody}`);
+    }
+
+    const messages = await messagesResponse.json();
+    const assistantMessage = messages.data.find(msg => msg.role === 'assistant');
+
+    if (!assistantMessage || !assistantMessage.content || assistantMessage.content.length === 0) {
+      console.error('No assistant message found:', messages);
+      throw new Error('No assistant message found in the response');
+    }
+
+    return assistantMessage.content[0].text.value;
+  } catch (error) {
+    if (error.name === 'AbortError' || error.message === 'Fetch aborted') {
+      console.log('Fetch aborted in createAssistantConversation');
+      throw error; // Re-throw to let the caller handle it
+    } else {
+      console.error('Error in createAssistantConversation:', error);
       throw error;
     }
+  }
+};
+
+export const testAPIConnection = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/models`, {
+      headers: {
+        'Authorization': `Bearer ${OPENAI_API_KEY}`,
+      },
+    });
+
+    if (!response.ok) {
+      const errorBody = await response.text();
+      console.error(`API test failed: ${response.status}`, errorBody);
+      throw new Error(`API test failed: ${response.status} - ${errorBody}`);
+    }
+
+    const data = await response.json();
+    console.log('API test successful:', data);
+    return true;
+  } catch (error) {
+    console.error('API test error:', error);
+    return false;
   }
 };

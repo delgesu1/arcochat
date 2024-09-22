@@ -1,0 +1,77 @@
+.message {
+    margin-bottom: 10px;
+    padding: 8px 12px;
+    border-radius: 20px;
+    max-width: 80%; /* Increased from 85% to 90% */
+  }
+  
+  .message.user {
+    background-color: #007bff;
+    color: white;
+    align-self: flex-end;
+    margin-left: auto;
+  }
+  
+  .message.assistant {
+    background-color: #f1f0f0;
+    color: black;
+    align-self: flex-start;
+  }
+  
+  .message.system {
+    background-color: #ffd700;
+    color: black;
+    align-self: center;
+  }
+  
+  .typing {
+    font-style: italic;
+    opacity: 0.7;
+  }
+  
+  .message-list {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    background-color: var(--dark-background-color);
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Space between messages */
+  }
+
+  .message {
+    max-width: 85%; /* Increased from 75% to 90% */
+    padding: 10px 14px;
+    border-radius: var(--border-radius);
+    font-size: 15px;
+    line-height: 1.5;
+    word-break: break-word;
+  }
+
+  .message.user {
+    background-color: var(--user-message-color);
+    color: var(--secondary-color);
+    align-self: flex-end;
+    border-bottom-right-radius: 4px; /* Slight adjustment */
+  }
+
+  .message.assistant {
+    background-color: var(--assistant-message-color);
+    color: var(--text-color);
+    align-self: flex-start;
+    border-bottom-left-radius: 4px; /* Slight adjustment */
+  }
+
+  .message.system {
+    background-color: #ffeaa7; /* Gentle yellow for system messages */
+    color: #2d3436;
+    align-self: center;
+    border-radius: var(--border-radius);
+  }
+
+  /* Typing Indicator Styling */
+  .typing-indicator {
+    font-style: italic;
+    opacity: 0.7;
+    color: var(--dark-gray);
+  }
