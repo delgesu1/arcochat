@@ -38,9 +38,29 @@ const sampleQuestions = [
     "How can I improve my intonation when playing complex chords and arpeggios?",
     "What exercises can help me maintain evenness and control in my bowing, particularly during fast passages?",
     "How can I practice to achieve a more relaxed and efficient left-hand technique, especially for challenging extensions?",
-    "What are some advanced methods for practicing and mastering difficult passages in concertos and solo pieces?"
-  ];
-  
+    "What are some advanced methods for practicing and mastering difficult passages in concertos and solo pieces?",
+    "How can I switch from wrist to arm vibrato effectively on the G-string?",
+    "What exercises improve finger pressure and intonation in fast double stops?",
+    "How do I refine my ricochet technique for smooth string crossings?",
+    "What are key strategies to minimize shifting noise in 7th position?",
+    "How can I control spiccato in the lower bow for fast passages?",
+    "How do I perfect bow distribution for long slurs with dynamic control?",
+    "What's the best way to transition between sautillé and detaché bowing?",
+    "How can I improve finger preparation for fast arpeggios across strings?",
+    "What exercises help with left-hand dexterity in upper-register chromatic runs?",
+    "How can I refine flying staccato at the frog for virtuoso passages?",
+    "How do I stabilize octave double stops during rapid scales?",
+    "What techniques help maintain clarity in expressive saltando passages?",
+    "How can I refine intonation for shifts between 5th and 6th positions?",
+    "How do I ensure consistent martelé articulation in fast orchestral excerpts?",
+    "How can I improve bow articulation at the tip for virtuosic passages?",
+    "What exercises strengthen the pinky for control in 4th and 5th positions?",
+    "How do I synchronize finger stroke and bow speed in sautillé?",
+    "How can I cleanly execute grace notes during large string crossings?",
+    "What methods stabilize my hand frame for double-stop 10ths in high positions?",
+    "How can I ensure even vibrato across all fingers in slow lyrical passages?"
+];
+
   export const getRandomQuestions = (count) => {
     const shuffled = [...sampleQuestions].sort(() => 0.5 - Math.random());
     return shuffled.slice(0, count);
