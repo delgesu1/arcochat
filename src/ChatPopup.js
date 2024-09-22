@@ -160,14 +160,12 @@ ${randomQuestions.map(q => `- ${q}`).join('\n')}`
 
   return (
     <>
-      {isExpanded && (
-        <ConversationHistory
-          conversations={conversations}
-          onSelectConversation={selectConversation}
-          onClose={closeHistory}
-          isOpen={isHistoryOpen}
-        />
-      )}
+      <ConversationHistory
+        conversations={conversations}
+        onSelectConversation={selectConversation}
+        onClose={closeHistory}
+        isOpen={isHistoryOpen}
+      />
       <div className={`chat-popup ${isOpen ? 'open' : ''} ${isExpanded ? 'expanded' : ''}`}>
         <div className="chat-header">
           {isExpanded && (
@@ -179,7 +177,7 @@ ${randomQuestions.map(q => `- ${q}`).join('\n')}`
           <div className="header-buttons">
             <button
               className="toggle-button"
-              onClick={toggleView}
+              onClick={() => setIsExpanded(prev => !prev)}
               aria-label={isExpanded ? 'Collapse Chat Sidebar' : 'Expand Chat Sidebar'}
               title={isExpanded ? 'Collapse Chat Sidebar' : 'Expand Chat Sidebar'}
             >
