@@ -58,7 +58,23 @@ const sampleQuestions = [
     "How do I synchronize finger stroke and bow speed in sautillé?",
     "How can I cleanly execute grace notes during large string crossings?",
     "What methods stabilize my hand frame for double-stop 10ths in high positions?",
-    "How can I ensure even vibrato across all fingers in slow lyrical passages?"
+    "How can I ensure even vibrato across all fingers in slow lyrical passages?",
+    "My pinky vibrato is weak and lacks control. How can I improve it?",
+    "My detache bowing doesn't produce a full, resonant sound. What can I do to enhance it?",
+    "I have pain and tension in my left-hand thumb while shifting. How can I alleviate this?",
+    "My bow arm feels tense during fast string crossings. What techniques can help me relax?",
+    "My double stops sound out of tune, especially in higher positions. How can I improve their intonation?",
+    "I struggle with keeping my wrist relaxed during long practice sessions. Any tips for maintaining relaxation?",
+    "My trills are uneven and lack speed. How can I improve their consistency and velocity?",
+    "My spiccato feels uncontrolled and inconsistent at faster tempos. How can I refine this technique?",
+    "I can't maintain smooth legato when changing strings. What exercises can help me improve this?",
+    "My shifting between 3rd and 5th positions is often inaccurate. How can I increase my precision?",
+    "I find it hard to maintain consistent dynamics in long phrases. What strategies can I use to improve this?",
+    "My bow grip becomes stiff when playing at the frog. How can I maintain flexibility?",
+    "I struggle with finger coordination in rapid passages. What exercises can help me improve?",
+    "My intonation in octaves gets inconsistent in fast sections. How can I maintain accuracy?",
+    "I lose control of my bow when playing soft, slow notes near the tip. How can I improve my control?",
+    "Please help me craft a detailed 1-month practice plan focused on scales."
 ];
 
   export const getRandomQuestions = (count) => {

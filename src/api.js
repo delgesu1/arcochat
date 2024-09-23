@@ -1,5 +1,5 @@
 // src/api.js
-import { OPENAI_API_KEY, ASSISTANT_ID, MODEL_ID } from './config';
+import { OPENAI_API_KEY, ASSISTANT_ID, MODEL_ID, VECTOR_STORE_ID } from './config';
 
 const headers = {
   'Content-Type': 'application/json',
@@ -54,13 +54,15 @@ export const createAssistantConversation = async (content, onChunk, signal) => {
       headers: headers,
       body: JSON.stringify({ 
         assistant_id: ASSISTANT_ID,
-        model: MODEL_ID, // Add this line to specify the model
+        // Remove the tools array completely
       }),
       signal: signal,
     });
 
     if (!runResponse.ok) {
-      throw new Error(`Failed to run assistant: ${runResponse.status}`);
+      const errorBody = await runResponse.text();
+      console.error('Error response body:', errorBody);
+      throw new Error(`Failed to run assistant: ${runResponse.status}. Error: ${errorBody}`);
     }
 
     const runData = await runResponse.json();
@@ -167,5 +169,54 @@ export const testAPIConnection = async () => {
   } catch (error) {
     console.error('API test error:', error);
     return false;
+  }
+};
+
+export const updateAssistantSettings = async (temperature, topP) => {
+  try {
+    const response = await fetch(`https://api.openai.com/v1/assistants/${ASSISTANT_ID}`, {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify({
+        model: MODEL_ID,
+        temperature: temperature,
+        top_p: topP
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to update assistant: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('Assistant updated successfully:', data);
+  } catch (error) {
+    console.error('Error updating assistant:', error);
+    throw error;
+  }
+};
+
+export const updateAssistantConfiguration = async () => {
+  try {
+    const response = await fetch(`https://api.openai.com/v1/assistants/${ASSISTANT_ID}`, {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify({
+        tools: [{ type: "code_interpreter" }, { type: "retrieval" }],
+        // Include other configuration options as needed
+      })
+    });
+
+    if (!response.ok) {
+      const errorBody = await response.text();
+      console.error('Error updating assistant:', errorBody);
+      throw new Error(`Failed to update assistant: ${response.status}. Error: ${errorBody}`);
+    }
+
+    const data = await response.json();
+    console.log('Assistant updated successfully:', data);
+  } catch (error) {
+    console.error('Error updating assistant:', error);
+    throw error;
   }
 };
