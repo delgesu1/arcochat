@@ -1,13 +1,24 @@
 // src/ChatPopup.js
 
 import React, { useState, useEffect, useRef, forwardRef } from 'react';
-import { FiMenu, FiMaximize2, FiMinimize2, FiX } from 'react-icons/fi';
+import { FiMenu, FiMaximize2, FiMinimize2, FiX, FiEdit } from 'react-icons/fi'; // Added FiEdit
 import { MessageList } from './MessageList';
 import { InputArea } from './InputArea';
 import { createAssistantConversation } from './api';
 import './ChatPopup.css';
 import ConversationHistory from './ConversationHistory';
 import { getRandomQuestions } from './utils';
+import { format, isToday, isYesterday } from 'date-fns';
+
+const formatDateHeading = (date) => {
+  if (isToday(date)) {
+    return 'Today';
+  } else if (isYesterday(date)) {
+    return 'Yesterday';
+  } else {
+    return format(date, 'MMMM dd');
+  }
+};
 
 export const ChatPopup = forwardRef(({ isOpen, onClose, initialMessages, onUpdateMessages }, ref) => {
   const [messages, setMessages] = useState(initialMessages);
@@ -15,53 +26,87 @@ export const ChatPopup = forwardRef(({ isOpen, onClose, initialMessages, onUpdat
   const [isExpanded, setIsExpanded] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [conversationList, setConversationList] = useState(() => {
+    const savedConversations = localStorage.getItem('conversationList');
+    if (savedConversations) {
+      return JSON.parse(savedConversations);
+    }
     const today = new Date();
     const oneDay = 24 * 60 * 60 * 1000;
     const conversations = [
-      { id: 1, title: "Vibrato Techniques for Beginners", date: new Date(today - 2 * oneDay).toISOString().split('T')[0] },
-      { id: 2, title: "Proper Bow Hold for Smooth Sound", date: new Date(today - 4 * oneDay).toISOString().split('T')[0] },
-      { id: 3, title: "Scales Practice Routine", date: new Date(today - oneDay).toISOString().split('T')[0] },
-      { id: 4, title: "Improving Intonation", date: new Date(today - 3 * oneDay).toISOString().split('T')[0] },
-      { id: 5, title: "Shifting Positions Smoothly", date: today.toISOString().split('T')[0] },
-      { id: 6, title: "Developing a Strong Left-Hand Frame", date: new Date(today - 2 * oneDay).toISOString().split('T')[0] },
-      { id: 7, title: "Bow Distribution Techniques", date: new Date(today - oneDay).toISOString().split('T')[0] },
-      { id: 8, title: "Mastering Spiccato Bowing", date: new Date(today - 4 * oneDay).toISOString().split('T')[0] },
-      { id: 9, title: "Effective Warm-up Exercises", date: new Date(today - 3 * oneDay).toISOString().split('T')[0] },
-      { id: 10, title: "Sight-Reading Strategies", date: today.toISOString().split('T')[0] },
-      { id: 11, title: "Practicing Difficult Passages", date: new Date(today - 2 * oneDay).toISOString().split('T')[0] },
-      { id: 12, title: "Developing Vibrato Speed", date: new Date(today - 4 * oneDay).toISOString().split('T')[0] },
-      { id: 13, title: "Improving Tone Quality", date: new Date(today - oneDay).toISOString().split('T')[0] },
-      { id: 14, title: "Memorization Techniques for Violinists", date: new Date(today - 3 * oneDay).toISOString().split('T')[0] },
-      { id: 15, title: "Efficient Practice Schedule", date: today.toISOString().split('T')[0] },
-      { id: 16, title: "Overcoming Performance Anxiety", date: new Date(today - 2 * oneDay).toISOString().split('T')[0] },
-      { id: 17, title: "Developing Musical Expressiveness", date: new Date(today - 4 * oneDay).toISOString().split('T')[0] },
-      { id: 18, title: "Proper Posture for Violinists", date: new Date(today - oneDay).toISOString().split('T')[0] },
-      { id: 19, title: "Choosing the Right Strings", date: new Date(today - 3 * oneDay).toISOString().split('T')[0] },
-      { id: 20, title: "Maintaining Your Violin", date: new Date(today - 2 * oneDay).toISOString().split('T')[0] },
+      // { id: 1, title: "Vibrato Techniques for Beginners", date: new Date(today - 2 * oneDay).toISOString().split('T')[0] },
+      // { id: 2, title: "Proper Bow Hold for Smooth Sound", date: new Date(today - 4 * oneDay).toISOString().split('T')[0] },
+      // { id: 3, title: "Scales Practice Routine", date: new Date(today - oneDay).toISOString().split('T')[0] },
+      // { id: 4, title: "Improving Intonation", date: new Date(today - 3 * oneDay).toISOString().split('T')[0] },
+      // { id: 5, title: "Shifting Positions Smoothly", date: today.toISOString().split('T')[0] },
+      // { id: 6, title: "Developing a Strong Left-Hand Frame", date: new Date(today - 2 * oneDay).toISOString().split('T')[0] },
+      // { id: 7, title: "Bow Distribution Techniques", date: new Date(today - oneDay).toISOString().split('T')[0] },
+      // { id: 8, title: "Mastering Spiccato Bowing", date: new Date(today - 4 * oneDay).toISOString().split('T')[0] },
+      // { id: 9, title: "Effective Warm-up Exercises", date: new Date(today - 3 * oneDay).toISOString().split('T')[0] },
+      // { id: 10, title: "Sight-Reading Strategies", date: today.toISOString().split('T')[0] },
+      // { id: 11, title: "Practicing Difficult Passages", date: new Date(today - 2 * oneDay).toISOString().split('T')[0] },
+      // { id: 12, title: "Developing Vibrato Speed", date: new Date(today - 4 * oneDay).toISOString().split('T')[0] },
+      // { id: 13, title: "Improving Tone Quality", date: new Date(today - oneDay).toISOString().split('T')[0] },
+      // { id: 14, title: "Memorization Techniques for Violinists", date: new Date(today - 3 * oneDay).toISOString().split('T')[0] },
+      // { id: 15, title: "Efficient Practice Schedule", date: today.toISOString().split('T')[0] },
+      // { id: 16, title: "Overcoming Performance Anxiety", date: new Date(today - 2 * oneDay).toISOString().split('T')[0] },
+      // { id: 17, title: "Developing Musical Expressiveness", date: new Date(today - 4 * oneDay).toISOString().split('T')[0] },
+      // { id: 18, title: "Proper Posture for Violinists", date: new Date(today - oneDay).toISOString().split('T')[0] },
+      // { id: 19, title: "Choosing the Right Strings", date: new Date(today - 3 * oneDay).toISOString().split('T')[0] },
+      // { id: 20, title: "Maintaining Your Violin", date: new Date(today - 2 * oneDay).toISOString().split('T')[0] },
     ];
     
     // Sort conversations by date, newest first
     return conversations.sort((a, b) => new Date(b.date) - new Date(a.date));
   });
 
-  const [conversations, setConversations] = useState([]);
   const [currentConversationId, setCurrentConversationId] = useState(null);
   const [sampleQuestions, setSampleQuestions] = useState([]);
   const [inputValue, setInputValue] = useState('');
   
   const messagesEndRef = useRef(null);
   const inputAreaRef = useRef(null);
-  const abortControllerRef = useRef(null);  // Add this line
+  const abortControllerRef = useRef(null);
 
-  // Reset input value when chat is closed
-  useEffect(() => {
-    if (!isOpen) {
-      setInputValue('');
-    }
-  }, [isOpen]);
+  // Function to save the current conversation state
+  const saveCurrentConversation = (conversationId, messages) => {
+    setConversationList((prevList) => {
+      // Find the conversation to update
+      const existingConversation = prevList.find(conversation => conversation.id === conversationId);
 
-  useEffect(() => {
-    // Generate welcome message with random questions when the component mounts
+      // If the conversation exists, update it
+      if (existingConversation) {
+        const updatedConversation = { ...existingConversation, messages, date: new Date().toISOString() };
+        // Remove the old conversation and add the updated one to the top
+        const updatedList = prevList.filter(conversation => conversation.id !== conversationId);
+        const newList = [updatedConversation, ...updatedList];
+        localStorage.setItem('conversationList', JSON.stringify(newList));
+        return newList;
+      }
+
+      // If the conversation does not exist, add it to the top
+      const newConversation = { id: conversationId, messages, date: new Date().toISOString() };
+      const newList = [newConversation, ...prevList];
+      localStorage.setItem('conversationList', JSON.stringify(newList));
+      return newList;
+    });
+  };
+
+  // Function to set the conversation title
+  const setConversationTitle = (conversationId, title) => {
+    setConversationList((prevList) => {
+      const updatedList = prevList.map((conversation) => {
+        if (conversation.id === conversationId) {
+          return { ...conversation, title };
+        }
+        return conversation;
+      });
+      localStorage.setItem('conversationList', JSON.stringify(updatedList));
+      return updatedList;
+    });
+  };
+
+  // Function to initialize the chat with welcome message
+  const initializeChat = () => {
     const randomQuestions = getRandomQuestions(5);
     setSampleQuestions(randomQuestions);
     const welcomeMessage = {
@@ -70,7 +115,19 @@ export const ChatPopup = forwardRef(({ isOpen, onClose, initialMessages, onUpdat
       sampleQuestions: randomQuestions
     };
     setMessages([welcomeMessage]);
+  };
+
+  // Use initializeChat when the component mounts
+  useEffect(() => {
+    initializeChat();
   }, []);
+
+  // Reset input value when chat is closed
+  useEffect(() => {
+    if (!isOpen) {
+      setInputValue('');
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -86,6 +143,25 @@ export const ChatPopup = forwardRef(({ isOpen, onClose, initialMessages, onUpdat
     const newMessages = [...messages, { role: 'user', content }];
     setMessages(newMessages);
     setInputValue(''); // Clear input after sending message
+
+    // Add the new conversation to the history if it's the first user message
+    if (messages.length === 1) {
+      const newConversation = {
+        id: currentConversationId,
+        title: content,
+        date: new Date().toISOString(),
+        messages: newMessages
+      };
+      setConversationList((prevList) => {
+        // Add the new conversation to the top of the list
+        const newList = [newConversation, ...prevList];
+        localStorage.setItem('conversationList', JSON.stringify(newList));
+        return newList;
+      });
+    } else {
+      // Save the current conversation state
+      saveCurrentConversation(currentConversationId, newMessages);
+    }
 
     const assistantMessage = { role: 'assistant', content: '' };
     setMessages(prevMessages => [...prevMessages, assistantMessage]);
@@ -113,7 +189,13 @@ export const ChatPopup = forwardRef(({ isOpen, onClose, initialMessages, onUpdat
         abortControllerRef.current.signal
       );
 
-      // No need to set a final message here, as it's been built up through streaming
+      // Save the current conversation state after the final AI assistant message is received
+      setMessages(prevMessages => {
+        const updatedMessages = [...prevMessages];
+        saveCurrentConversation(currentConversationId, updatedMessages);
+        return updatedMessages;
+      });
+
     } catch (error) {
       console.error('Error in handleSendMessage:', error);
       if (error.name === 'AbortError') {
@@ -156,9 +238,18 @@ export const ChatPopup = forwardRef(({ isOpen, onClose, initialMessages, onUpdat
     setIsHistoryOpen(prev => !prev);
   };
 
+  const handleNewChat = () => {
+    initializeChat();
+    const newConversationId = Date.now(); // Use a unique ID
+    setCurrentConversationId(newConversationId);
+  };
+
   const selectConversation = (conversationId) => {
-    console.log(`Selected conversation: ${conversationId}`);
-    setIsHistoryOpen(false);
+    const selectedConversation = conversationList.find(convo => convo.id === conversationId);
+    if (selectedConversation) {
+      setMessages(selectedConversation.messages || []);
+      setCurrentConversationId(conversationId); // Update the current conversation ID
+    }
   };
 
   const closeHistory = () => {
@@ -174,17 +265,24 @@ export const ChatPopup = forwardRef(({ isOpen, onClose, initialMessages, onUpdat
         onSelectConversation={selectConversation}
         onClose={closeHistory}
         isOpen={isHistoryOpen}
+        currentConversationId={currentConversationId} // Pass the current conversation ID
       />
       <div className={`chat-popup ${isOpen ? 'open' : ''} ${isExpanded ? 'expanded' : ''}`}>
         <div className="chat-header">
-          <button className="hamburger-button" onClick={toggleHistory} aria-label="Toggle Conversation History">
-            <FiMenu size={20} />
-          </button>
+          <div className="header-left-buttons">
+            <button className="hamburger-button" onClick={toggleHistory} aria-label="Toggle Conversation History">
+              <FiMenu size={20} />
+            </button>
+            {/* New Chat Button */}
+            <button className="new-chat-button" onClick={handleNewChat} aria-label="Start New Chat">
+              <FiEdit size={20} />
+            </button>
+          </div>
           <h3>Professor ArcoAI</h3>
           <div className="header-buttons">
             <button
               className="toggle-button"
-              onClick={() => setIsExpanded(prev => !prev)}
+              onClick={toggleView}
               aria-label={isExpanded ? 'Collapse Chat Sidebar' : 'Expand Chat Sidebar'}
               title={isExpanded ? 'Collapse Chat Sidebar' : 'Expand Chat Sidebar'}
             >

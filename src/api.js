@@ -210,7 +210,7 @@ export const updateAssistantSettings = async (temperature, topP) => {
       method: 'POST',
       headers: headers,
       body: JSON.stringify({
-        model: MODEL_ID,
+        model: 'gpt-4o-mini',
         temperature: temperature,
         top_p: topP
       })

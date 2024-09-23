@@ -64,6 +64,7 @@
   color: var(--secondary-color);
   border-top-left-radius: var(--border-radius);
   border-top-right-radius: var(--border-radius);
+  justify-content: space-between; /* Ensure spacing between left and right buttons */
 }
 
 /* Header Buttons Container */
@@ -207,23 +208,56 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 10px;
 }
 
 .hamburger-button:hover {
-  color: #c0d8ff;
+  color: #c0d8ff; /* Change icon color on hover */
 }
 
-.hamburger-button:focus {
-  outline: none;
-  box-shadow: 0 0 0 2px var(--primary-color);
-}
-
-/* Update chat-header to accommodate the hamburger button */
-.chat-header {
-  /* ... existing styles ... */
+/* New Chat Button Styling */
+.new-chat-button {
+  background: none; /* Ensure no background */
+  border: none; /* No border */
+  color: var(--secondary-color);
+  cursor: pointer;
+  padding: 4px;
   display: flex;
   align-items: center;
+  justify-content: center;
+  margin-left: -3px; /* Move button to the left by 10px */
+  
+  /* Vertical alignment */
+  position: relative;
+  top: 9px;
+}
+
+.new-chat-button:hover {
+  color: #c0d8ff; /* Change icon color on hover */
+  background: none !important; /* Ensure no background */
+  box-shadow: none !important; /* Ensure no box-shadow */
+}
+
+.new-chat-button:focus {
+  outline: none !important; /* Ensure no outline */
+  box-shadow: none !important; /* Ensure no box-shadow */
+}
+
+/* Update chat-header to accommodate the buttons */
+.chat-header {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  background-color: var(--primary-color);
+  color: var(--secondary-color);
+  border-top-left-radius: var(--border-radius);
+  border-top-right-radius: var(--border-radius);
+  justify-content: space-between; /* Ensure spacing between left and right buttons */
+}
+
+.header-left-buttons {
+  display: flex;
+  align-items: center; /* Ensure items are centered vertically */
+  position: relative; /* Add position relative if not already present */
 }
 
 .chat-header h3 {
@@ -234,115 +268,10 @@
   text-align: center;
 }
 
-/* ... rest of the existing styles ... */
-
-/* Mobile-specific styles */
-@media screen and (max-width: 767px) {
-  .chat-popup {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: 100%;
-    height: 100%;
-    max-width: 100%;
-    border-radius: 0;
-    transform: none;
-  }
-
-  .chat-popup.open {
-    transform: none;
-  }
-
-  .chat-popup.expanded {
-    width: 100%;
-    height: 100%;
-  }
-
-  .chat-header {
-    padding: 12px;
-    height: 50px; /* Fixed height for header */
-  }
-
-  .chat-header h3 {
-    font-size: 18px;
-  }
-
-  .message-list {
-    height: calc(100% - 110px); /* Adjust based on header and input area heights */
-    padding: 10px;
-  }
-
-  .input-area {
-    padding: 10px;
-    height: 60px; /* Fixed height for input area */
-  }
-
-  /* Ensure buttons are easily tappable */
-  .toggle-button,
-  .close-button,
-  .hamburger-button {
-    padding: 8px;
-    margin: 0 4px;
-  }
-
-  /* Adjust input and send button for better mobile experience */
-  .input-area textarea {
-    font-size: 16px; /* Prevent zoom on input focus on iOS */
-  }
-
-  .send-button {
-    width: 40px;
-    height: 40px;
-  }
-}
-
-/* iPhone-specific adjustments */
-@media screen and (max-width: 428px) { /* iPhone 12 Pro Max width */
-  .chat-popup {
-    /* Ensure full screen on iPhones with notches */
-    padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-
-  .chat-header {
-    padding-left: env(safe-area-inset-left);
-    padding-right: env(safe-area-inset-right);
-  }
-
-  .input-area {
-    padding-left: env(safe-area-inset-left);
-    padding-right: env(safe-area-inset-right);
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-}
-
-/* ... rest of the existing styles ... */
-
-.sample-questions {
+/* Header Buttons Container */
+.header-buttons {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 16px;
-  background-color: var(--background-color);
-}
-
-.sample-question-button {
-  background-color: var(--light-background-color);
-  border: 1px solid var(--light-gray);
-  border-radius: var(--border-radius);
-  padding: 8px 12px;
-  font-size: 14px;
-  color: var(--text-color);
-  cursor: pointer;
-  transition: background-color 0.2s ease, border-color 0.2s ease;
-  text-align: left;
-}
-
-.sample-question-button:hover {
-  background-color: var(--hover-color);
-  border-color: var(--primary-color);
+  align-items: center;
 }
 
 /* ... rest of the existing styles ... */

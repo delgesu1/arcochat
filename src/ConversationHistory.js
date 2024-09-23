@@ -1,62 +1,33 @@
 import React from 'react';
 import { FiX } from 'react-icons/fi';
 import './ConversationHistory.css';
+import { format, isToday, isYesterday } from 'date-fns';
 
-const isToday = (date) => {
-  const today = new Date();
-  return date.getDate() === today.getDate() &&
-    date.getMonth() === today.getMonth() &&
-    date.getFullYear() === today.getFullYear();
+const formatDateHeading = (date) => {
+  if (isToday(date)) {
+    return 'Today';
+  } else if (isYesterday(date)) {
+    return 'Yesterday';
+  } else {
+    return format(date, 'MMMM dd');
+  }
 };
 
-const isYesterday = (date) => {
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-  return date.getDate() === yesterday.getDate() &&
-    date.getMonth() === yesterday.getMonth() &&
-    date.getFullYear() === yesterday.getFullYear();
-};
+const ConversationHistory = ({ conversations, onSelectConversation, onClose, isOpen, currentConversationId }) => {
+  if (!isOpen) return null;
 
-const formatDate = (date) => {
-  const options = { month: 'long', day: '2-digit' };
-  return date.toLocaleDateString(undefined, options);
-};
-
-const ConversationHistory = ({ conversations, onSelectConversation, onClose, isOpen }) => {
   const groupConversationsByDate = (conversations) => {
-    const grouped = {};
-    
-    // Sort conversations by date, newest first
-    const sortedConversations = [...conversations].sort((a, b) => new Date(b.date) - new Date(a.date));
-    
-    sortedConversations.forEach(conversation => {
+    const grouped = conversations.reduce((acc, conversation) => {
       const date = new Date(conversation.date);
-      let groupTitle;
-
-      if (isToday(date)) {
-        groupTitle = 'Today';
-      } else if (isYesterday(date)) {
-        groupTitle = 'Yesterday';
-      } else {
-        groupTitle = formatDate(date);
+      const heading = formatDateHeading(date);
+      if (!acc[heading]) {
+        acc[heading] = [];
       }
+      acc[heading].push(conversation);
+      return acc;
+    }, {});
 
-      if (!grouped[groupTitle]) {
-        grouped[groupTitle] = [];
-      }
-      grouped[groupTitle].push(conversation);
-    });
-    
-    // Sort the group titles (dates) from newest to oldest
-    const sortedGroups = Object.entries(grouped).sort((a, b) => {
-      if (a[0] === 'Today') return -1;
-      if (b[0] === 'Today') return 1;
-      if (a[0] === 'Yesterday') return -1;
-      if (b[0] === 'Yesterday') return 1;
-      return new Date(b[0]) - new Date(a[0]);
-    });
-    
-    return sortedGroups;
+    return Object.entries(grouped);
   };
 
   const groupedConversations = groupConversationsByDate(conversations);
@@ -76,7 +47,7 @@ const ConversationHistory = ({ conversations, onSelectConversation, onClose, isO
             {convos.map((conversation) => (
               <div 
                 key={conversation.id} 
-                className="conversation-item"
+                className={`conversation-item ${conversation.id === currentConversationId ? 'active' : ''}`}
                 onClick={() => onSelectConversation(conversation.id)}
               >
                 {conversation.title}

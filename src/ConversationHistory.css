@@ -123,6 +123,10 @@
   background-color: rgba(74, 144, 226, 0.1);
 }
 
+.conversation-item.active {
+  background-color: rgba(74, 144, 226, 0.1); /* Same as hover effect */
+}
+
 /* Scrollbar styling */
 .conversation-list-container::-webkit-scrollbar {
   width: 8px;
@@ -139,4 +143,19 @@
 
 .conversation-list-container::-webkit-scrollbar-thumb:hover {
   background-color: var(--dark-gray);
+}
+
+.conversation-history ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.conversation-history li {
+  padding: 10px;
+  cursor: pointer;
+}
+
+.conversation-history li.active {
+  background-color: #e0f7fa; /* Light cyan background */
+  border-left: 4px solid #00796b; /* Teal border on the left */
 }
