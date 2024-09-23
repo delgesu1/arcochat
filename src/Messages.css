@@ -197,3 +197,47 @@
 }
 
 /* ... rest of the existing styles ... */
+
+.message.assistant ol {
+  counter-reset: item;
+  padding-left: 0;
+  list-style-type: none;
+}
+
+.message.assistant ol > li {
+  counter-increment: item;
+  position: relative;
+  padding-left: 2.5em; /* Increased from 2em to 2.5em */
+  margin-bottom: 1em; /* Increased from 0.5em to 1em */
+}
+
+.message.assistant ol > li::before {
+  content: counter(item);
+  background-color: #d6e9ed;
+  color: #333;
+  font-weight: bold;
+  width: 1.5em;
+  height: 1.5em;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  left: 0.25em; /* Added 0.25em of space to the left */
+  top: 0;
+}
+
+/* Add more space after titles */
+.message.assistant ol > li > p:first-child {
+  margin-bottom: 0.5em;
+}
+
+/* Add space between bullet points */
+.message.assistant ul {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+.message.assistant ul > li {
+  margin-bottom: 0.5em;
+}

@@ -6,9 +6,23 @@ import './App.css';
 
 const App = () => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [chatHistory, setChatHistory] = useState([]);
   const [messages, setMessages] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
   const abortControllerRef = useRef(null);
+
+  // Load chat history from localStorage when the app starts
+  useEffect(() => {
+    const savedHistory = localStorage.getItem('chatHistory');
+    if (savedHistory) {
+      setChatHistory(JSON.parse(savedHistory));
+    }
+  }, []);
+
+  // Save chat history to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
+  }, [chatHistory]);
 
   const togglePopup = () => {
     console.log('Toggling popup, current state:', isPopupOpen);
@@ -75,16 +89,18 @@ const App = () => {
     }
   };
 
+  const updateChatHistory = (newMessages) => {
+    setChatHistory(newMessages);
+  };
+
   return (
     <div className="app">
       <ChatIcon onClick={togglePopup} />
       <ChatPopup
         isOpen={isPopupOpen}
         onClose={togglePopup}
-        messages={messages}
-        isTyping={isTyping}
-        onSendMessage={handleSendMessage}
-        onCancel={handleCancel}
+        initialMessages={chatHistory}
+        onUpdateMessages={updateChatHistory}
       />
     </div>
   );

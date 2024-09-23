@@ -19,12 +19,12 @@ export const createAssistantConversation = async (content, onChunk, signal) => {
   }
 
   try {
-    // Create a new thread directly with OpenAI API
+    // Create a new thread
     console.log('Creating thread...');
     const threadResponse = await fetch(`https://api.openai.com/v1/threads`, {
       method: 'POST',
       headers: headers,
-      body: JSON.stringify({ /* your thread data if needed */ }),
+      body: JSON.stringify({}),
       signal: signal,
     });
 
@@ -54,7 +54,7 @@ export const createAssistantConversation = async (content, onChunk, signal) => {
       headers: headers,
       body: JSON.stringify({ 
         assistant_id: ASSISTANT_ID,
-        // Remove the tools array completely
+        stream: true // Enable streaming
       }),
       signal: signal,
     });
@@ -65,45 +65,74 @@ export const createAssistantConversation = async (content, onChunk, signal) => {
       throw new Error(`Failed to run assistant: ${runResponse.status}. Error: ${errorBody}`);
     }
 
-    const runData = await runResponse.json();
-    const runId = runData.id;
+    const reader = runResponse.body.getReader();
+    const decoder = new TextDecoder('utf-8');
+    let buffer = '';
 
-    // Poll for run completion
-    let runStatus = 'queued';
-    while (runStatus !== 'completed' && runStatus !== 'failed' && runStatus !== 'expired' && runStatus !== 'cancelled') {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      const statusResponse = await fetch(`https://api.openai.com/v1/threads/${threadId}/runs/${runId}`, {
-        headers: headers,
-        signal: signal,
-      });
-      const statusData = await statusResponse.json();
-      runStatus = statusData.status;
+    let isFirstChunk = true;
+    let accumulatedContent = '';
 
-      if (runStatus === 'requires_action') {
-        console.log('Run requires action. Function calling not implemented in this example.');
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop();
+
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          const dataStr = line.slice(6);
+          
+          if (dataStr.trim() === '[DONE]') {
+            console.log('Stream completed');
+            break;
+          }
+
+          try {
+            const data = JSON.parse(dataStr);
+            
+            if (data.object === 'thread.message.delta') {
+              if (data.delta && data.delta.content && data.delta.content.length > 0) {
+                for (const contentItem of data.delta.content) {
+                  if (contentItem.type === 'text' && contentItem.text) {
+                    // Remove source markers from the chunk before accumulating
+                    let cleanedText = contentItem.text.value.replace(/【[^】]*】/g, '');
+                    accumulatedContent += cleanedText;
+                    if (isFirstChunk || accumulatedContent.length >= 10) {
+                      onChunk(accumulatedContent);
+                      accumulatedContent = '';
+                      isFirstChunk = false;
+                    }
+                  }
+                }
+              }
+            }
+          } catch (error) {
+            console.error('Error parsing JSON:', error);
+          }
+        }
       }
     }
 
-    if (runStatus === 'completed') {
-      // Retrieve messages
-      const messagesResponse = await fetch(`https://api.openai.com/v1/threads/${threadId}/messages`, {
-        headers: headers,
-        signal: signal,
-      });
-      const messagesData = await messagesResponse.json();
-      
-      // Process the assistant's message
-      const assistantMessage = processMessage(messagesData.data[0]);
-      
-      if (onChunk) {
-        onChunk(assistantMessage);
-      }
-      
-      console.log('Assistant message received:', assistantMessage);
-      return assistantMessage;
-    } else {
-      throw new Error(`Assistant run failed with status: ${runStatus}`);
+    if (accumulatedContent.length > 0) {
+      onChunk(accumulatedContent);
     }
+
+    console.log('Streaming completed');
+
+    // Retrieve the final message after streaming is complete
+    const messagesResponse = await fetch(`https://api.openai.com/v1/threads/${threadId}/messages`, {
+      headers: headers,
+      signal: signal,
+    });
+    const messagesData = await messagesResponse.json();
+    let finalMessage = messagesData.data[0].content[0].text.value;
+
+    // Final cleaning step
+    finalMessage = finalMessage.replace(/【[^】]*】/g, '');
+
+    return finalMessage;
   } catch (error) {
     console.error('Detailed error in createAssistantConversation:', error);
     throw error;
@@ -129,8 +158,11 @@ function processMessage(message) {
     // Remove any remaining citation numbers and brackets
     processedContent = processedContent.replace(/\[\d+\]/g, '');
 
-    // Trim any extra whitespace that might be left after removing citations
-    processedContent = processedContent.trim();
+    // Remove source indicators like 【4:0†source】 and any variations
+    processedContent = processedContent.replace(/【[^】]*】/g, '');
+
+    // Additional cleanup for any remaining similar patterns
+    processedContent = processedContent.replace(/[【][^】]*[】]/g, '');
 
     return processedContent;
   } catch (error) {

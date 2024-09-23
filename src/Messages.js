@@ -8,6 +8,8 @@ import { marked } from 'marked'; // Import the marked library
 import './Messages.css';
 
 export const Message = ({ role, content, sampleQuestions, onSampleQuestionClick }) => {
+  console.log('Message rendering, role:', role, 'content:', content); // Add this log
+  
   const [isCopied, setIsCopied] = useState(false);
 
   if (!content) return null;

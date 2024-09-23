@@ -77,7 +77,11 @@ const sampleQuestions = [
     "Please help me craft a detailed 1-month practice plan focused on scales."
 ];
 
-  export const getRandomQuestions = (count) => {
-    const shuffled = [...sampleQuestions].sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, count);
-  };
+export const getRandomQuestions = (count) => {
+  const shuffled = [...sampleQuestions];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled.slice(0, count);
+};

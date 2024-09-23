@@ -3,6 +3,11 @@ import { Message } from './Messages';
 import './MessageList.css';
 
 export const MessageList = ({ messages, isTyping, onSampleQuestionClick }) => {
+  console.log('MessageList rendering, messages:', messages);
+  
+  const lastMessage = messages[messages.length - 1];
+  const showTypingIndicator = isTyping && (!lastMessage || lastMessage.role !== 'assistant' || lastMessage.content === '');
+
   return (
     <div className="message-list">
       {messages.map((message, index) =>
@@ -16,7 +21,7 @@ export const MessageList = ({ messages, isTyping, onSampleQuestionClick }) => {
           />
         ) : null
       )}
-      {isTyping && (
+      {showTypingIndicator && (
         <div className="message assistant">
           <div className="message-content typing-indicator">
             The assistant is typing...

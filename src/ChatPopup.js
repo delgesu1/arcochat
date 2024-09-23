@@ -9,8 +9,8 @@ import './ChatPopup.css';
 import ConversationHistory from './ConversationHistory';
 import { getRandomQuestions } from './utils';
 
-export const ChatPopup = forwardRef(({ isOpen, onClose }, ref) => {
-  const [messages, setMessages] = useState([]);
+export const ChatPopup = forwardRef(({ isOpen, onClose, initialMessages, onUpdateMessages }, ref) => {
+  const [messages, setMessages] = useState(initialMessages);
   const [isTyping, setIsTyping] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
@@ -53,6 +53,13 @@ export const ChatPopup = forwardRef(({ isOpen, onClose }, ref) => {
   const inputAreaRef = useRef(null);
   const abortControllerRef = useRef(null);  // Add this line
 
+  // Reset input value when chat is closed
+  useEffect(() => {
+    if (!isOpen) {
+      setInputValue('');
+    }
+  }, [isOpen]);
+
   useEffect(() => {
     // Generate welcome message with random questions when the component mounts
     const randomQuestions = getRandomQuestions(5);
@@ -71,62 +78,53 @@ export const ChatPopup = forwardRef(({ isOpen, onClose }, ref) => {
     }
   }, [messages]);
 
+  useEffect(() => {
+    onUpdateMessages(messages);
+  }, [messages, onUpdateMessages]);
+
   const handleSendMessage = async (content) => {
-    // Add user's visible message to the message list
-    setMessages(prevMessages => [...prevMessages, { role: 'user', content }]);
+    const newMessages = [...messages, { role: 'user', content }];
+    setMessages(newMessages);
+    setInputValue(''); // Clear input after sending message
 
-    // Silently append the additional sentence to the content
-    const modifiedContent = `${content} (Please refer exclusively to your knowledge base and DO NOT make up information or use ANY outside knowledge. If what is being asked doesn't appear in your knowledge-base, simply reply "I don't have information on that topic".)`;
-
-    // Add an empty assistant message to hold streaming content
     const assistantMessage = { role: 'assistant', content: '' };
     setMessages(prevMessages => [...prevMessages, assistantMessage]);
 
     setIsTyping(true);
 
-    // Initialize AbortController to handle cancellation
     abortControllerRef.current = new AbortController();
 
     try {
-      // Use the modifiedContent in the API call
-      await createAssistantConversation(modifiedContent, (chunk) => {
-        setMessages(prevMessages => {
-          const lastMessage = prevMessages[prevMessages.length - 1];
-          if (lastMessage && lastMessage.role === 'assistant') {
-            // Append the new chunk to the assistant's message
-            const updatedMessage = {
-              ...lastMessage,
-              content: lastMessage.content + chunk,
-            };
-            const updatedMessages = [...prevMessages];
-            updatedMessages[updatedMessages.length - 1] = updatedMessage;
-            return updatedMessages;
-          } else {
-            // If the last message isn't assistant, add a new one
-            return [...prevMessages, { role: 'assistant', content: chunk }];
-          }
-        });
-      }, abortControllerRef.current.signal);
+      await createAssistantConversation(
+        content,
+        (chunk) => {
+          setMessages(prevMessages => {
+            const lastMessage = prevMessages[prevMessages.length - 1];
+            if (lastMessage.role === 'assistant') {
+              const updatedMessage = {
+                ...lastMessage,
+                content: lastMessage.content + chunk,
+              };
+              return [...prevMessages.slice(0, -1), updatedMessage];
+            }
+            return prevMessages;
+          });
+        },
+        abortControllerRef.current.signal
+      );
+
+      // No need to set a final message here, as it's been built up through streaming
     } catch (error) {
+      console.error('Error in handleSendMessage:', error);
       if (error.name === 'AbortError') {
-        // Handle fetch cancellation
         setMessages(prevMessages => [
           ...prevMessages,
           { role: 'system', content: 'AI response was canceled.' },
         ]);
-        // Optionally, remove the empty assistant message
-        setMessages(prevMessages => prevMessages.slice(0, -1));
       } else {
-        console.error('Error in handleSendMessage:', error);
-        let errorMessage = 'An error occurred while processing your request. ';
-        if (error.message.includes('Rate limit')) {
-          errorMessage += 'You are sending messages too quickly. Please wait and try again.';
-        } else {
-          errorMessage += 'Please try again later or contact support if the problem persists.';
-        }
         setMessages(prevMessages => [
           ...prevMessages,
-          { role: 'system', content: errorMessage },
+          { role: 'system', content: 'An error occurred while processing your request.' },
         ]);
       }
     } finally {
@@ -179,11 +177,9 @@ export const ChatPopup = forwardRef(({ isOpen, onClose }, ref) => {
       />
       <div className={`chat-popup ${isOpen ? 'open' : ''} ${isExpanded ? 'expanded' : ''}`}>
         <div className="chat-header">
-          {isExpanded && (
-            <button className="hamburger-button" onClick={toggleHistory} aria-label="Toggle Conversation History">
-              <FiMenu size={20} />
-            </button>
-          )}
+          <button className="hamburger-button" onClick={toggleHistory} aria-label="Toggle Conversation History">
+            <FiMenu size={20} />
+          </button>
           <h3>Professor ArcoAI</h3>
           <div className="header-buttons">
             <button
