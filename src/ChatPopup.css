@@ -141,60 +141,105 @@
 /* Responsive Adjustments for Expanded Sidebar */
 @media (max-width: 768px) {
   .chat-popup {
-    width: 90%;
-    height: 70vh;
-    right: 5%;
-    bottom: 10px;
+    width: 100%; /* Ensure full width */
+    height: 85vh; /* Shorten the height by 15% */
+    position: fixed;
+    top: 0; /* Align to the top */
+    left: 0; /* Align to the left */
+    right: 0; /* Align to the right */
+    bottom: 0; /* Align to the bottom */
+    border-radius: 0;
+    display: flex;
+    flex-direction: column;
+    z-index: 1000; /* Ensure it is above other elements */
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+    margin: 0; /* Remove any margin */
+    padding: 0; /* Remove any padding */
   }
 
   .chat-popup.expanded {
-    width: 100%; /* Full width on smaller screens */
-    height: 100vh;
-    right: 0;
-    bottom: 0;
+    width: 100%; /* Ensure full width */
+    height: 85vh; /* Shorten the height by 15% */
+    position: fixed;
+    top: 0; /* Align to the top */
+    left: 0; /* Align to the left */
+    right: 0; /* Align to the right */
+    bottom: 0; /* Align to the bottom */
     border-radius: 0;
+    display: flex;
+    flex-direction: column;
+    z-index: 1000; /* Ensure it is above other elements */
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+    margin: 0; /* Remove any margin */
+    padding: 0; /* Remove any padding */
   }
 
-  .chat-header h3 {
-    font-size: 18px;
+  .chat-header {
+    padding: 12px;
+    flex-shrink: 0;
   }
 
-  .toggle-button {
-    font-size: 18px;
+  .message-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
   }
 
-  .close-button {
-    font-size: 18px;
+  .input-area {
+    padding: 12px;
+    flex-shrink: 0;
   }
 }
 
 @media (max-width: 480px) {
   .chat-popup {
-    width: 100%;
-    height: 100vh;
-    right: 0;
-    bottom: 0;
+    width: 100%; /* Ensure full width */
+    height: 85vh; /* Shorten the height by 15% */
+    position: fixed;
+    top: 0; /* Align to the top */
+    left: 0; /* Align to the left */
+    right: 0; /* Align to the right */
+    bottom: 0; /* Align to the bottom */
     border-radius: 0;
+    display: flex;
+    flex-direction: column;
+    z-index: 1000; /* Ensure it is above other elements */
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+    margin: 0; /* Remove any margin */
+    padding: 0; /* Remove any padding */
   }
 
   .chat-popup.expanded {
-    width: 100%;
-    height: 100vh;
-    right: 0;
-    bottom: 0;
+    width: 100%; /* Ensure full width */
+    height: 85vh; /* Shorten the height by 15% */
+    position: fixed;
+    top: 0; /* Align to the top */
+    left: 0; /* Align to the left */
+    right: 0; /* Align to the right */
+    bottom: 0; /* Align to the bottom */
     border-radius: 0;
+    display: flex;
+    flex-direction: column;
+    z-index: 1000; /* Ensure it is above other elements */
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+    margin: 0; /* Remove any margin */
+    padding: 0; /* Remove any padding */
   }
 
   .chat-header {
     padding: 12px;
+    flex-shrink: 0;
+  }
+
+  .message-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
   }
 
   .input-area {
     padding: 12px;
-  }
-
-  .message-list {
-    padding: 16px;
+    flex-shrink: 0;
   }
 }
 

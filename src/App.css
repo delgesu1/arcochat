@@ -100,6 +100,8 @@ body {
   flex: 1;
   display: flex;
   flex-direction: column;
+  margin: 0; /* Ensure no margin */
+  padding: 0; /* Ensure no padding */
 }
 
 .chat-header {
@@ -113,6 +115,8 @@ body {
   flex: 1;
   overflow-y: auto;
   padding: 20px;
+  margin: 0; /* Ensure no margin */
+  box-sizing: border-box; /* Include padding and border in the element's total width and height */
 }
 
 .input-area {
