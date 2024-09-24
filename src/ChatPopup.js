@@ -69,25 +69,14 @@ export const ChatPopup = forwardRef(({ isOpen, onClose, initialMessages, onUpdat
 
   // Function to save the current conversation state
   const saveCurrentConversation = (conversationId, messages) => {
-    setConversationList((prevList) => {
-      // Find the conversation to update
-      const existingConversation = prevList.find(conversation => conversation.id === conversationId);
-
-      // If the conversation exists, update it
-      if (existingConversation) {
-        const updatedConversation = { ...existingConversation, messages, date: new Date().toISOString() };
-        // Remove the old conversation and add the updated one to the top
-        const updatedList = prevList.filter(conversation => conversation.id !== conversationId);
-        const newList = [updatedConversation, ...updatedList];
-        localStorage.setItem('conversationList', JSON.stringify(newList));
-        return newList;
-      }
-
-      // If the conversation does not exist, add it to the top
-      const newConversation = { id: conversationId, messages, date: new Date().toISOString() };
-      const newList = [newConversation, ...prevList];
-      localStorage.setItem('conversationList', JSON.stringify(newList));
-      return newList;
+    setConversationList(prevList => {
+      const updatedList = prevList.map(conversation => 
+        conversation.id === conversationId 
+          ? { ...conversation, messages, date: new Date().toISOString() }
+          : conversation
+      );
+      localStorage.setItem('conversationList', JSON.stringify(updatedList));
+      return updatedList;
     });
   };
 
@@ -144,16 +133,19 @@ export const ChatPopup = forwardRef(({ isOpen, onClose, initialMessages, onUpdat
     setMessages(newMessages);
     setInputValue(''); // Clear input after sending message
 
-    // Add the new conversation to the history if it's the first user message
+    // Check if this is the first user message
     if (messages.length === 1) {
+      const newConversationId = Date.now(); // Generate a unique ID
+      setCurrentConversationId(newConversationId);
+      
       const newConversation = {
-        id: currentConversationId,
-        title: content,
+        id: newConversationId,
+        title: content, // Use the first message as the title
         date: new Date().toISOString(),
         messages: newMessages
       };
-      setConversationList((prevList) => {
-        // Add the new conversation to the top of the list
+      
+      setConversationList(prevList => {
         const newList = [newConversation, ...prevList];
         localStorage.setItem('conversationList', JSON.stringify(newList));
         return newList;
@@ -171,15 +163,17 @@ export const ChatPopup = forwardRef(({ isOpen, onClose, initialMessages, onUpdat
     abortControllerRef.current = new AbortController();
 
     try {
+      let fullAssistantResponse = '';
       await createAssistantConversation(
         content,
         (chunk) => {
+          fullAssistantResponse += chunk;
           setMessages(prevMessages => {
             const lastMessage = prevMessages[prevMessages.length - 1];
             if (lastMessage.role === 'assistant') {
               const updatedMessage = {
                 ...lastMessage,
-                content: lastMessage.content + chunk,
+                content: fullAssistantResponse,
               };
               return [...prevMessages.slice(0, -1), updatedMessage];
             }
@@ -245,15 +239,41 @@ export const ChatPopup = forwardRef(({ isOpen, onClose, initialMessages, onUpdat
   };
 
   const selectConversation = (conversationId) => {
+    // Save the current conversation before switching
+    if (currentConversationId) {
+      saveCurrentConversation(currentConversationId, messages);
+    }
+
     const selectedConversation = conversationList.find(convo => convo.id === conversationId);
     if (selectedConversation) {
       setMessages(selectedConversation.messages || []);
-      setCurrentConversationId(conversationId); // Update the current conversation ID
+      setCurrentConversationId(conversationId);
     }
   };
 
   const closeHistory = () => {
     setIsHistoryOpen(false);
+  };
+
+  const handleRenameConversation = (id, newTitle) => {
+    setConversationList((prevList) => {
+      const updatedList = prevList.map((conversation) =>
+        conversation.id === id ? { ...conversation, title: newTitle } : conversation
+      );
+      localStorage.setItem('conversationList', JSON.stringify(updatedList));
+      return updatedList;
+    });
+  };
+
+  const handleDeleteConversation = (id) => {
+    setConversationList((prevList) => {
+      const updatedList = prevList.filter((conversation) => conversation.id !== id);
+      localStorage.setItem('conversationList', JSON.stringify(updatedList));
+      return updatedList;
+    });
+    if (currentConversationId === id) {
+      initializeChat();
+    }
   };
 
   if (!isOpen) return null;
@@ -265,7 +285,9 @@ export const ChatPopup = forwardRef(({ isOpen, onClose, initialMessages, onUpdat
         onSelectConversation={selectConversation}
         onClose={closeHistory}
         isOpen={isHistoryOpen}
-        currentConversationId={currentConversationId} // Pass the current conversation ID
+        currentConversationId={currentConversationId}
+        onRenameConversation={handleRenameConversation}
+        onDeleteConversation={handleDeleteConversation}
       />
       <div className={`chat-popup ${isOpen ? 'open' : ''} ${isExpanded ? 'expanded' : ''}`}>
         <div className="chat-header">
