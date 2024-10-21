@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { FiX, FiEdit2, FiTrash2 } from 'react-icons/fi';
 import './ConversationHistory.css';
-import { format, isToday, isYesterday } from 'date-fns';
+import { format, isToday, isYesterday, parseISO } from 'date-fns';
 
 const formatDateHeading = (date) => {
   if (isToday(date)) {
@@ -28,7 +28,7 @@ const ConversationHistory = ({
 
   const groupConversationsByDate = (conversations) => {
     const grouped = conversations.reduce((acc, conversation) => {
-      const date = new Date(conversation.date);
+      const date = parseISO(conversation.date);
       const heading = formatDateHeading(date);
       if (!acc[heading]) {
         acc[heading] = [];
@@ -37,7 +37,13 @@ const ConversationHistory = ({
       return acc;
     }, {});
 
-    return Object.entries(grouped);
+    return Object.entries(grouped).sort((a, b) => {
+      if (a[0] === 'Today') return -1;
+      if (b[0] === 'Today') return 1;
+      if (a[0] === 'Yesterday') return -1;
+      if (b[0] === 'Yesterday') return 1;
+      return new Date(b[0]) - new Date(a[0]);
+    });
   };
 
   const groupedConversations = groupConversationsByDate(conversations);

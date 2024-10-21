@@ -137,21 +137,23 @@
   background-color: rgba(74, 144, 226, 0.1);
   border-left-color: var(--primary-color);
 }
-
 .conversation-item span {
   flex-grow: 1;
   overflow: hidden;
   display: -webkit-box;
+  display: box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
+  box-orient: vertical;
   line-height: 1.3;
   max-height: 2.6em;
   width: 100%; /* Ensure the span takes full width */
 }
 
 .conversation-item:hover span {
-  mask-image: linear-gradient(to right, black 50%, transparent 75%);
-  -webkit-mask-image: linear-gradient(to right, black 50%, transparent 75%);
+  mask-image: linear-gradient(to right, black 60%, transparent 75%);
+  -webkit-mask-image: linear-gradient(to right, black 60%, transparent 75%);
 }
 
 .conversation-actions {

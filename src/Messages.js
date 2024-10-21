@@ -14,9 +14,22 @@ export const Message = ({ role, content, sampleQuestions, onSampleQuestionClick 
 
   if (!content) return null;
 
+  // Function to remove citation markers
+  const removeCitationMarkers = (text) => {
+    // Remove anything between 【 】, including the markers
+    text = text.replace(/【[^】]*】/g, '');
+    
+    // Remove any remaining numbered citations like [1], [2], etc.
+    text = text.replace(/\[\d+\]/g, '');
+    
+    return text;
+  };
+
+  const processedContent = role === 'assistant' ? removeCitationMarkers(content) : content;
+
   const handleCopy = () => {
     // Convert Markdown to HTML
-    const htmlContent = marked(content);
+    const htmlContent = marked(processedContent);
     
     // Use a temporary element to strip HTML tags for plain text
     const tempElement = document.createElement('div');
@@ -41,7 +54,7 @@ export const Message = ({ role, content, sampleQuestions, onSampleQuestionClick 
     <div className={`message ${role}`}>
       <div className="message-content">
         <ReactMarkdown remarkPlugins={[remarkGfm]}>
-          {content}
+          {processedContent}
         </ReactMarkdown>
         {sampleQuestions && sampleQuestions.length > 0 && (
           <div className="sample-questions">

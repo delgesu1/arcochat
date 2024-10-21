@@ -106,9 +106,13 @@ export const ChatPopup = forwardRef(({ isOpen, onClose, initialMessages, onUpdat
     setMessages([welcomeMessage]);
   };
 
-  // Use initializeChat when the component mounts
+  // Update this useEffect to load the initial messages correctly
   useEffect(() => {
-    initializeChat();
+    if (initialMessages && initialMessages.length > 0) {
+      setMessages(initialMessages);
+    } else {
+      initializeChat();
+    }
   }, []);
 
   // Reset input value when chat is closed
@@ -129,6 +133,9 @@ export const ChatPopup = forwardRef(({ isOpen, onClose, initialMessages, onUpdat
   }, [messages, onUpdateMessages]);
 
   const handleSendMessage = async (content) => {
+    // Silently append the additional sentence to the content
+    const modifiedContent = `${content} (Please refer exclusively to your knowledge base, analyzing a diversity of documents to form your answer. Always provide specific examples and step by step exercises when appropriate. If you can't find answers in your knowledge-base, simply reply "I don't have information on that topic". Your output should be at least 4000 tokens.)`;
+
     const newMessages = [...messages, { role: 'user', content }];
     setMessages(newMessages);
     setInputValue(''); // Clear input after sending message
@@ -165,19 +172,18 @@ export const ChatPopup = forwardRef(({ isOpen, onClose, initialMessages, onUpdat
     try {
       let fullAssistantResponse = '';
       await createAssistantConversation(
-        content,
+        modifiedContent,
         (chunk) => {
           fullAssistantResponse += chunk;
           setMessages(prevMessages => {
-            const lastMessage = prevMessages[prevMessages.length - 1];
+            const updatedMessages = [...prevMessages];
+            const lastMessage = updatedMessages[updatedMessages.length - 1];
             if (lastMessage.role === 'assistant') {
-              const updatedMessage = {
-                ...lastMessage,
-                content: fullAssistantResponse,
-              };
-              return [...prevMessages.slice(0, -1), updatedMessage];
+              lastMessage.content = fullAssistantResponse;
+            } else {
+              updatedMessages.push({ role: 'assistant', content: fullAssistantResponse });
             }
-            return prevMessages;
+            return updatedMessages;
           });
         },
         abortControllerRef.current.signal

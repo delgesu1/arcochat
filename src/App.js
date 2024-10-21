@@ -10,6 +10,11 @@ const App = () => {
   const [messages, setMessages] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
   const abortControllerRef = useRef(null);
+  const [conversationList, setConversationList] = useState(() => {
+    const savedConversations = localStorage.getItem('conversationList');
+    return savedConversations ? JSON.parse(savedConversations) : [];
+  });
+  const [currentConversation, setCurrentConversation] = useState(null);
 
   // Load chat history from localStorage when the app starts
   useEffect(() => {
@@ -23,6 +28,10 @@ const App = () => {
   useEffect(() => {
     localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
   }, [chatHistory]);
+
+  useEffect(() => {
+    localStorage.setItem('conversationList', JSON.stringify(conversationList));
+  }, [conversationList]);
 
   const togglePopup = () => {
     console.log('Toggling popup, current state:', isPopupOpen);
@@ -40,7 +49,7 @@ const App = () => {
 
     try {
       // Silently append the additional sentence to the content
-      const modifiedContent = `${message} (Please refer exclusively to your knowledge base and DO NOT make up information or use ANY outside knowledge. If what is being asked doesn't appear in your knowledge-base, simply reply "I don't have information on that topic".)`;
+      const modifiedContent = `${message} (Please refer exclusively to your knowledge base, analyzing a diversity of documents to form your answer. Always provide specific examples and step by step exercises when appropriate. If you can't find answers in your knowledge-base, simply reply "I don't have information on that topic". Your output should be at least 4000 tokens.)`;
 
       const assistantResponse = await createAssistantConversation(
         modifiedContent,
@@ -99,8 +108,18 @@ const App = () => {
       <ChatPopup
         isOpen={isPopupOpen}
         onClose={togglePopup}
-        initialMessages={chatHistory}
-        onUpdateMessages={updateChatHistory}
+        initialMessages={currentConversation ? currentConversation.messages : []}
+        onUpdateMessages={(updatedMessages) => {
+          if (currentConversation) {
+            setConversationList(prevList => 
+              prevList.map(convo => 
+                convo.id === currentConversation.id 
+                  ? { ...convo, messages: updatedMessages } 
+                  : convo
+              )
+            );
+          }
+        }}
       />
     </div>
   );
