@@ -7,14 +7,11 @@ import './App.css';
 const App = () => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [chatHistory, setChatHistory] = useState([]);
-  const [messages, setMessages] = useState([]);
-  const [isTyping, setIsTyping] = useState(false);
   const abortControllerRef = useRef(null);
   const [conversationList, setConversationList] = useState(() => {
     const savedConversations = localStorage.getItem('conversationList');
     return savedConversations ? JSON.parse(savedConversations) : [];
   });
-  const [currentConversation, setCurrentConversation] = useState(null);
 
   // Load chat history from localStorage when the app starts
   useEffect(() => {
@@ -39,22 +36,13 @@ const App = () => {
   };
 
   const handleSendMessage = async (message) => {
-    setMessages((prevMessages) => [
-      ...prevMessages,
-      { role: 'user', content: message },
-    ]);
-
-    setIsTyping(true);
-    abortControllerRef.current = new AbortController();
+    const modifiedContent = `${message} (Please find a relevant document(s) in your knowledge base and use that to answer me. Always provide specific examples and step by step exercises when appropriate. If you can't find answers in your knowledge-base, simply reply "I don't have information on that topic". Your output should be at least 4000 tokens.)`;
 
     try {
-      // Silently append the additional sentence to the content
-      const modifiedContent = `${message} (Please refer exclusively to your knowledge base, analyzing a diversity of documents to form your answer. Always provide specific examples and step by step exercises when appropriate. If you can't find answers in your knowledge-base, simply reply "I don't have information on that topic". Your output should be at least 4000 tokens.)`;
-
       const assistantResponse = await createAssistantConversation(
         modifiedContent,
         (chunk) => {
-          setMessages((prevMessages) => {
+          setChatHistory((prevMessages) => {
             const lastMessage = prevMessages[prevMessages.length - 1];
             if (lastMessage.role === 'assistant') {
               return [
@@ -69,25 +57,24 @@ const App = () => {
         abortControllerRef.current.signal
       );
 
-      setMessages((prevMessages) => [
+      setChatHistory((prevMessages) => [
         ...prevMessages,
         { role: 'assistant', content: assistantResponse },
       ]);
     } catch (error) {
       if (error.name === 'AbortError') {
-        setMessages((prevMessages) => [
+        setChatHistory((prevMessages) => [
           ...prevMessages,
           { role: 'system', content: 'AI response was canceled.' },
         ]);
       } else {
-        setMessages((prevMessages) => [
+        setChatHistory((prevMessages) => [
           ...prevMessages,
           { role: 'system', content: 'An error occurred while fetching the AI response.' },
         ]);
         console.error('Fetch error:', error);
       }
     } finally {
-      setIsTyping(false);
       abortControllerRef.current = null;
     }
   };
@@ -108,17 +95,15 @@ const App = () => {
       <ChatPopup
         isOpen={isPopupOpen}
         onClose={togglePopup}
-        initialMessages={currentConversation ? currentConversation.messages : []}
+        initialMessages={chatHistory}
         onUpdateMessages={(updatedMessages) => {
-          if (currentConversation) {
-            setConversationList(prevList => 
-              prevList.map(convo => 
-                convo.id === currentConversation.id 
-                  ? { ...convo, messages: updatedMessages } 
-                  : convo
-              )
-            );
-          }
+          setConversationList(prevList => 
+            prevList.map(convo => 
+              convo.id === chatHistory.id 
+                ? { ...convo, messages: updatedMessages } 
+                : convo
+            )
+          );
         }}
       />
     </div>

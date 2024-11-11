@@ -72,11 +72,21 @@ export const ChatPopup = forwardRef(({ isOpen, onClose, initialMessages, onUpdat
     setConversationList(prevList => {
       const updatedList = prevList.map(conversation => 
         conversation.id === conversationId 
-          ? { ...conversation, messages, date: new Date().toISOString() }
+          ? { 
+              ...conversation, 
+              messages,
+              date: new Date().toISOString() // Store full ISO timestamp for accurate sorting
+            }
           : conversation
       );
-      localStorage.setItem('conversationList', JSON.stringify(updatedList));
-      return updatedList;
+      
+      // Sort conversations by date, most recent first
+      const sortedList = [...updatedList].sort((a, b) => 
+        new Date(b.date) - new Date(a.date)
+      );
+      
+      localStorage.setItem('conversationList', JSON.stringify(sortedList));
+      return sortedList;
     });
   };
 
@@ -133,12 +143,12 @@ export const ChatPopup = forwardRef(({ isOpen, onClose, initialMessages, onUpdat
   }, [messages, onUpdateMessages]);
 
   const handleSendMessage = async (content) => {
-    // Silently append the additional sentence to the content
-    const modifiedContent = `${content} (Please refer exclusively to your knowledge base, analyzing a diversity of documents to form your answer. Always provide specific examples and step by step exercises when appropriate. If you can't find answers in your knowledge-base, simply reply "I don't have information on that topic". Your output should be at least 4000 tokens.)`;
+    // Preserve the modifiedContent functionality
+    const modifiedContent = `${content} (Please find a relevant document(s) in your knowledge base and use that to answer me. Always provide specific examples and step by step exercises when appropriate. If you can't find answers in your knowledge-base, simply reply "I don't have information on that topic". Your output should be at least 4000 tokens.)`;
 
     const newMessages = [...messages, { role: 'user', content }];
     setMessages(newMessages);
-    setInputValue(''); // Clear input after sending message
+    setInputValue('');
 
     // Check if this is the first user message
     if (messages.length === 1) {
@@ -148,7 +158,7 @@ export const ChatPopup = forwardRef(({ isOpen, onClose, initialMessages, onUpdat
       const newConversation = {
         id: newConversationId,
         title: content, // Use the first message as the title
-        date: new Date().toISOString(),
+        date: new Date().toISOString(), // Store full ISO timestamp
         messages: newMessages
       };
       
@@ -158,44 +168,36 @@ export const ChatPopup = forwardRef(({ isOpen, onClose, initialMessages, onUpdat
         return newList;
       });
     } else {
-      // Save the current conversation state
+      // Update existing conversation with new timestamp and messages
       saveCurrentConversation(currentConversationId, newMessages);
     }
 
-    const assistantMessage = { role: 'assistant', content: '' };
-    setMessages(prevMessages => [...prevMessages, assistantMessage]);
-
-    setIsTyping(true);
-
-    abortControllerRef.current = new AbortController();
-
+    // Continue with the AI response handling
     try {
-      let fullAssistantResponse = '';
-      await createAssistantConversation(
+      setIsTyping(true);
+      abortControllerRef.current = new AbortController();
+      
+      const assistantResponse = await createAssistantConversation(
         modifiedContent,
         (chunk) => {
-          fullAssistantResponse += chunk;
           setMessages(prevMessages => {
-            const updatedMessages = [...prevMessages];
-            const lastMessage = updatedMessages[updatedMessages.length - 1];
-            if (lastMessage.role === 'assistant') {
-              lastMessage.content = fullAssistantResponse;
-            } else {
-              updatedMessages.push({ role: 'assistant', content: fullAssistantResponse });
+            const lastMessage = prevMessages[prevMessages.length - 1];
+            if (lastMessage?.role === 'assistant') {
+              return [
+                ...prevMessages.slice(0, -1),
+                { ...lastMessage, content: lastMessage.content + chunk }
+              ];
             }
-            return updatedMessages;
+            return [...prevMessages, { role: 'assistant', content: chunk }];
           });
         },
         abortControllerRef.current.signal
       );
 
-      // Save the current conversation state after the final AI assistant message is received
-      setMessages(prevMessages => {
-        const updatedMessages = [...prevMessages];
-        saveCurrentConversation(currentConversationId, updatedMessages);
-        return updatedMessages;
-      });
-
+      // After receiving the complete response, update the conversation again
+      const finalMessages = [...newMessages, { role: 'assistant', content: assistantResponse }];
+      saveCurrentConversation(currentConversationId, finalMessages);
+      
     } catch (error) {
       console.error('Error in handleSendMessage:', error);
       if (error.name === 'AbortError') {
