@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { Message } from './Messages';
 import './MessageList.css';
 
@@ -8,21 +8,41 @@ export const MessageList = ({ messages, isTyping, onSampleQuestionClick }) => {
   const messageListRef = useRef(null);
   const lastMessage = messages[messages.length - 1];
   const showTypingIndicator = isTyping && (!lastMessage || lastMessage.role !== 'assistant' || lastMessage.content === '');
+  const [isUserScrolling, setIsUserScrolling] = useState(false);
 
+  // Scroll to the bottom of the chat container
+  const scrollToBottom = () => {
+    messageListRef.current.scrollTop = messageListRef.current.scrollHeight;
+  };
+
+  // useEffect(() => {
+  //   const scrollToBottom = () => {
+  //     if (messageListRef.current) {
+  //       messageListRef.current.scrollTop = messageListRef.current.scrollHeight;
+  //     }
+  //   };
+
+  //   scrollToBottom();
+  //   const timeoutId = setTimeout(scrollToBottom, 100);
+  //   return () => clearTimeout(timeoutId);
+  // }, [messages, isTyping]);
+
+  // Automatically scroll to the bottom when new messages are added
   useEffect(() => {
-    const scrollToBottom = () => {
-      if (messageListRef.current) {
-        messageListRef.current.scrollTop = messageListRef.current.scrollHeight;
-      }
-    };
+    if (!isUserScrolling) {
+      scrollToBottom();
+    }
+  }, [messages]);
 
-    scrollToBottom();
-    const timeoutId = setTimeout(scrollToBottom, 100);
-    return () => clearTimeout(timeoutId);
-  }, [messages, isTyping]);
+  // Track user scroll behavior
+  const handleScroll = () => {
+    const { scrollTop, scrollHeight, clientHeight } = messageListRef.current;
+    const isAtBottom = scrollTop + clientHeight >= scrollHeight - 20;
+    setIsUserScrolling(!isAtBottom);
+  };
 
   return (
-    <div className="message-list" ref={messageListRef}>
+    <div className="message-list" ref={messageListRef}  onScroll={handleScroll}>
       {messages.map((message, index) =>
         message && message.content ? (
           <Message 
