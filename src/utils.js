@@ -74,7 +74,15 @@ const sampleQuestions = [
     "I struggle with finger coordination in rapid passages. What exercises can help me improve?",
     "My intonation in octaves gets inconsistent in fast sections. How can I maintain accuracy?",
     "I lose control of my bow when playing soft, slow notes near the tip. How can I improve my control?",
-    "Please help me craft a detailed 1-month practice plan focused on scales."
+    "Please help me craft a detailed 1-month practice plan focused on scales.",
+    "How can I convey deeper emotional nuances in my interpretation of Romantic violin pieces?",
+    "What are some methods to bring out inner voices in polyphonic violin works?",
+    "How can I develop nuanced bow control to achieve a wider range of tonal colors?",
+    "What practice strategies improve my ability to shape and interpret musical phrases?",
+    "What are effective ways to communicate the narrative or emotion inherent in a piece?",
+    "How can I incorporate rubato to enhance expression without disrupting the overall tempo?",
+    "How can articulation and bowing techniques shape the character and style of a piece?",
+    "How do I cultivate a personal interpretive voice while honoring the composer's work?",
 ];
 
 export const getRandomQuestions = (count) => {
