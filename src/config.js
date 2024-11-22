@@ -12,7 +12,7 @@ console.log('Raw env variables:', {
   export const OPENAI_API_KEY = process.env.REACT_APP_OPENAI_API_KEY;
   export const ASSISTANT_ID = process.env.REACT_APP_OPENAI_ASSISTANT_ID;
   export const VECTOR_STORE_ID = process.env.REACT_APP_VECTOR_STORE_ID;
-  export const MODEL_ID = process.env.REACT_APP_MODEL_ID || 'gpt-4o-2024-08-06'; // Update default model
+  export const MODEL_ID = process.env.REACT_APP_MODEL_ID || 'gpt-4o-2024-11-20'; // Update default model
   export const TEMPERATURE = 0.5;
   export const TOP_P = 1.0;
   
